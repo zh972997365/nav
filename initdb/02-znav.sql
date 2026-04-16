@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : znav
+ Source Server         : zh
  Source Server Type    : MySQL
  Source Server Version : 80400 (8.4.0)
  Source Host           : 124.70.135.41:3306
@@ -11,7 +11,7 @@
  Target Server Version : 80400 (8.4.0)
  File Encoding         : 65001
 
- Date: 27/05/2025 13:49:50
+ Date: 16/04/2026 10:11:03
 */
 
 SET NAMES utf8mb4;
@@ -36,7 +36,7 @@ CREATE TABLE `applications`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `fk_menus_apps`(`menu_id` ASC) USING BTREE,
   CONSTRAINT `fk_menus_apps` FOREIGN KEY (`menu_id`) REFERENCES `menus` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 280 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 292 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of applications
@@ -44,7 +44,6 @@ CREATE TABLE `applications`  (
 INSERT INTO `applications` VALUES (62, 'LINUX DO', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_58e05dfaee148.png', 'https://linux.do/', '真诚、友善、团结、专业，共建你我引以为荣之社区。', 'active', 42, '2024-09-02 09:02:48.686', '2024-10-10 16:08:02.979', -7, '#000000');
 INSERT INTO `applications` VALUES (63, '水墨图床', 'https://img.ink/favicon.ico', 'https://img.ink/', '图片映客--水墨图床，免费专业的高速外链图床-免费高速图床-致力于创建一流的图片加速空间', 'active', 45, '2024-09-02 09:02:48.686', '2024-09-03 17:58:57.652', 0, '#000000');
 INSERT INTO `applications` VALUES (64, 'ChatGPT', 'https://pic2.ziyuan.wang/user/hozh/diy/navicon/apple-touch-icon.82af6fe1_0add8de44f2d9.png', 'https://www.chatgpt.com/', 'ChatGPT 是OpenAI研发的一款聊天机器人程序', 'active', 42, '2024-09-02 09:02:48.686', '2024-09-25 15:06:52.375', -10, '#000000');
-INSERT INTO `applications` VALUES (65, 'New API', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_5c6dff0a7df0e.png', 'https://zapi.hoozh.cn/', 'OpenAI 接口聚合管理，支持多种渠道包括 Azure，可用于二次分发管理 key，仅单可执行文件，已打包好 Docker 镜像，一键部署，开箱即用', 'active', 42, '2024-09-02 09:02:48.686', '2024-11-01 16:17:09.762', -9, '#000000');
 INSERT INTO `applications` VALUES (66, 'Claude', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_40ed4d522ab67.png', 'https://claude.ai/', 'Claude，美国人工智能初创公司Anthropic发布的大型语言模型家族', 'active', 44, '2024-09-02 09:02:48.686', '2024-10-10 16:08:19.082', 0, '#000000');
 INSERT INTO `applications` VALUES (67, 'Kimi', 'https://statics.moonshot.cn/kimi-chat/favicon.ico', 'https://kimi.moonshot.cn/', 'Kimi 是一个有着超大“内存”的智能助手，可以一口气读完二十万字的小说，还会上网冲浪，快来跟他聊聊吧 | Kimi.ai - Moonshot AI 出品的智能助手', 'active', 44, '2024-09-02 09:02:48.686', '2024-09-04 03:33:37.155', 0, '#000000');
 INSERT INTO `applications` VALUES (68, 'ChatGLM', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_2b924106a083d.png', 'https://www.chatglm.cn/', 'ChatGLM是清华大学开发的,经过约1T标识符的中英双语训练,拥有62 亿参数的开源AI大语言模型,它能生成相当符合人类偏好的回答。', 'active', 44, '2024-09-02 09:02:48.686', '2024-10-10 17:03:05.709', 0, '#000000');
@@ -129,7 +128,7 @@ INSERT INTO `applications` VALUES (147, 'Free Credit Card Checker', 'https://pic
 INSERT INTO `applications` VALUES (148, '随机密码生成器', 'fluent:password-16-regular', 'https://tool.lu/strrandom/', '随机密码生成器，随机字符串生成器', 'active', 45, '2024-09-02 09:02:48.686', '2024-11-08 11:25:06.401', 0, '#EA0B0B');
 INSERT INTO `applications` VALUES (149, 'Diffchecker-文本比较', 'https://www.diffchecker.com/favicon.ico', 'https://www.diffchecker.com/zh-Hans/', 'Diffchecker 将比较文本以找出两个文本文件之间的差异。只需粘贴您的文件，然后单击查找差异！', 'active', 45, '2024-09-02 09:02:48.686', '2024-11-08 11:24:06.576', 0, '#000000');
 INSERT INTO `applications` VALUES (151, '知乎网', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_1c3647688e840.png', 'https://www.zhihu.com/', '知乎,中文互联网高质量的问答社区和创作者聚集的原创内容平台', 'active', 48, '2024-09-02 09:02:48.686', '2024-10-10 16:39:36.334', 0, '#000000');
-INSERT INTO `applications` VALUES (152, 'Chat评测榜单', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_d205ccdd9ff52.png', 'https://lmarena.ai/?leaderboard', '评测榜单旨在为大语言模型和多模态模型提供全面、客观且中立的得分与排名，同时提供多能力维度的评分参考，以便用户能够更全面地了解大模型的能力水平。', 'active', 44, '2024-09-02 09:02:48.686', '2025-01-07 10:40:51.741', 0, '#000000');
+INSERT INTO `applications` VALUES (152, 'LLM 测评', 'https://llm-stats.com/favicon.ico', 'https://llm-stats.com/', 'Explore the leaderboard and compare AI models by context window, speed, and price. Access benchmarks for LLMs like GPT-4o, Llama, o1, Gemini, and Claude', 'active', 44, '2024-09-02 09:02:48.686', '2025-08-19 10:47:13.659', 0, '#000000');
 INSERT INTO `applications` VALUES (153, 'Golang中文社区', 'https://pic2.ziyuan.wang/user/hozh/diy/navicon/favicon_205797a06c09a.ico', 'https://studygolang.com/', 'Go语言中文网，中国 Golang 社区，Go语言学习园地，致力于构建完善的 Golang 中文社区，Go语言爱好者的学习家园。分享 Go 语言知识，交流使用经验', 'active', 70, '2024-09-02 09:02:48.686', '2024-09-03 17:58:57.652', -9, '#000000');
 INSERT INTO `applications` VALUES (154, '地鼠文档', 'https://www.topgoer.cn/favicon.ico', 'https://www.topgoer.cn/', 'go语言文档网站通过收集整理go语言相关的学习文档，为大家提供一个学习平台', 'active', 70, '2024-09-02 09:02:48.686', '2024-09-03 17:58:57.652', 0, '#000000');
 INSERT INTO `applications` VALUES (155, 'Gin中文文档 · 看云', 'simple-icons:gin', 'https://www.kancloud.cn/shuangdeyu/gin_book/949411', 'Gin中文参考文档', 'active', 70, '2024-09-02 09:02:48.686', '2024-11-08 11:23:11.890', 0, '#0062FF');
@@ -162,7 +161,6 @@ INSERT INTO `applications` VALUES (212, 'ECharts', 'https://pic2.ziyuan.wang/use
 INSERT INTO `applications` VALUES (213, '桑帛云API', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_b0b743afc30bb.png', 'https://api.lolimi.cn/', '桑帛云API,简单、易用、免费。提供多种实用接口,助力开发者高效工作。欢迎体验,探索无限可能,快速的免费API数据接口服务,服务器采用国内,稳定运行,官方交流群：516666275', 'active', 81, '2024-09-09 09:32:55.914', '2024-10-17 16:47:23.905', -8, '#000000');
 INSERT INTO `applications` VALUES (215, '网易云课堂', 'tabler:book', 'https://study.163.com/', '网易云课堂，一个专注于成人终身学习的在线教育平台。立足于实用性的要求, 与优质的教育内容创作者一起，为您提供全面、有效的在线学习内容。', 'active', 49, '2024-09-19 14:12:26.928', '2024-09-19 14:30:46.510', 0, '#BF4444');
 INSERT INTO `applications` VALUES (216, 'Element', 'https://element.eleme.cn/favicon.ico', 'https://element.eleme.cn/', 'Element，一套为开发者、设计师和产品经理准备的基于 Vue 2.0 的桌面端组件库', 'active', 67, '2024-09-19 14:45:45.113', '2024-09-19 14:46:31.640', 0, '#000000');
-INSERT INTO `applications` VALUES (217, 'Open WebUI', 'https://www.zhozw.cn/static/favicon.png', 'https://www.zhozw.cn/', 'Open WebUI 是一个多功能且直观的开源用户界面,与 ollama 配合使用,它作为一个webui,为用户提供了一个私有化的 ChatGPT 体验。', 'active', 42, '2024-09-20 15:46:58.837', '2024-09-20 15:47:45.384', 0, '#000000');
 INSERT INTO `applications` VALUES (218, 'IP 检测工具', 'oui:token-ip', 'https://ping0.cc/', '高质量IP归属地查询、检测、全球小鸡监控平台。', 'active', 45, '2024-09-20 17:21:37.833', '2024-09-23 17:14:18.319', 0, '#000000');
 INSERT INTO `applications` VALUES (219, '数字玩家', 'https://www.opkfc.com/favicon.ico', 'https://www.opkfc.com/list', '数字玩家-免费共享的GPT账户', 'active', 44, '2024-09-20 17:47:57.069', '2024-09-20 17:47:57.069', 0, '#000000');
 INSERT INTO `applications` VALUES (220, 'OpenUI', 'mdi:material-ui', 'https://openui.fly.dev/ai/new', 'OpenUI是一个基于现代Web标准（如HTML5, CSS3 和 ES6）的轻量级框架，它的核心理念是提供可自定义的组件和模块化的设计，以适应各种项目需求。通过OpenUI，您可以快速地搭建用户界面，节省时间和精力，同时保持代码的整洁与可维护性。', 'active', 44, '2024-09-20 17:50:44.845', '2024-09-20 18:03:09.354', 0, '#6BBC1A');
@@ -215,10 +213,22 @@ INSERT INTO `applications` VALUES (272, '取文件', 'https://pic2.ziyuan.wang/u
 INSERT INTO `applications` VALUES (273, 'React Bits', 'https://www.reactbits.dev/favicon.ico', 'https://www.reactbits.dev/', 'An open source collection of high quality, animated, interactive & fully customizable React components for building stunning, memorable user interfaces.', 'active', 68, '2025-03-10 17:20:50.543', '2025-03-10 17:20:50.543', 0, '#000000');
 INSERT INTO `applications` VALUES (274, 'GIF动图大全', 'https://cdn-sqn.aigei.com/assets/site/img/icon/favicon.ico', 'https://www.aigei.com/lib/gif/', '爱给网-免费GIF动图下载专区,为创作者提供海量精品动图素材,含可爱,沙雕,搞笑,科幻,卡通,节日庆祝等gif动图,gif特效动画,一键打包,免费下载', 'active', 45, '2025-04-07 18:22:36.358', '2025-04-07 18:22:36.358', 0, '#000000');
 INSERT INTO `applications` VALUES (275, 'ttsfm', 'hugeicons:voice', 'https://ttsapi.site/index_zh.html', '文本转语音', 'active', 44, '2025-04-10 09:42:14.835', '2025-04-10 09:42:14.835', 0, '#009DFF');
-INSERT INTO `applications` VALUES (276, 'MCP市场', 'https://mcpmarket.cn/static/img/mcp_logo_32.png', 'https://mcpmarket.cn/', 'MCP市场 - 5000+ Model Context Protocol服务器收录平台，一键连接Claude、Cursor等AI客户端，释放大模型能力。', 'active', 44, '2025-04-10 17:25:20.032', '2025-04-10 17:25:20.032', 0, '#000000');
+INSERT INTO `applications` VALUES (276, 'MCP市场', 'https://mcpmarket.cn/static/img/mcp_logo_32.png', 'https://mcpmarket.cn/', 'MCP市场 - 5000+ Model Context Protocol服务器收录平台，一键连接Claude、Cursor等AI客户端，释放大模型能力。', 'active', 84, '2025-04-10 17:25:20.032', '2025-06-16 11:27:10.846', 0, '#000000');
 INSERT INTO `applications` VALUES (277, '大橘周刊RSSRSS', 'https://rrorangeandfriends.site/favicon.ico', 'https://rrorangeandfriends.site/posts/2025/030', '《大橘和朋友们的周刊》： 分享日常冲浪互联网看到好玩的网站、app应用、资源分享、效率软件工具集等', 'active', 48, '2025-04-29 14:23:36.888', '2025-04-29 14:23:36.888', 0, '#000000');
 INSERT INTO `applications` VALUES (278, '虾壳 - GitHub加速', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_3446e3238e91d.png', 'https://xiake.pro/', '虾壳是一个GitHub下载加速网站，提供GitHub文件加速服务，支持API、Git以及Releases、 Archive、gist、raw.githubusercontent.com等文件代理加速下载', 'active', 45, '2025-05-27 10:10:57.833', '2025-05-27 10:10:57.833', 0, '#000000');
-INSERT INTO `applications` VALUES (279, 'AllinSSL-证书管理', 'iconamoon:certificate-badge-bold', 'https://github.com/allinssl/allinssl', 'AllinSSL 是一个集证书申请、管理、部署和监控于一体的SSL证书全生命周期管理工具。AllinSSL is an all-in-one SSL certificate lifecycle management tool that integrates certificate application, management, deployment, and monitoring.  - GitHub - allinssl/allinssl: AllinSSL 是一个集证书申请、管理、部署和监控于一体的SSL证书全生命周期管理工具。AllinSSL is an all-in-one SSL certificate lifecycle management tool that integrates certificate application, management, deployment, and monitoring.', 'active', 46, '2025-05-27 13:48:59.476', '2025-05-27 13:49:27.776', 0, '#3891FD');
+INSERT INTO `applications` VALUES (279, 'AllinSSL-证书管理', 'https://allinssl.com/favicon.ico', 'https://allinssl.com/', '开源免费的 SSL 证书自动化申请、部署、管理平台', 'active', 46, '2025-05-27 13:48:59.476', '2025-05-27 13:55:17.346', 0, '#3891FD');
+INSERT INTO `applications` VALUES (280, '阿里云MCP', 'https://img.alicdn.com/tfs/TB1_ZXuNcfpK1RjSZFOXXa6nFXa-32-32.ico', 'https://bailian.console.aliyun.com/?tab=mcp#/mcp-market', '连接智能，即点即用，探索阿里云百炼全周期 MCP 服务', 'active', 84, '2025-06-06 16:41:44.040', '2025-06-06 16:41:44.040', 0, '#000000');
+INSERT INTO `applications` VALUES (281, '百度MCP', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_48f26177f5064.png', 'https://sai.baidu.com/mcp', '百度搜索开放平台，探索海量可用的 MCP Servers', 'active', 84, '2025-06-06 16:42:10.527', '2025-06-06 16:42:10.527', 0, '#000000');
+INSERT INTO `applications` VALUES (282, '火山引擎MCP', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_dc9104a5f3727.png', 'https://www.volcengine.com/mcp-marketplace', '探索与体验大模型丰富生态服务，轻松集成全面且易用的工具，提供企业级稳定、高效、安全的技术支持，释放模型潜力，赋能创新应用。', 'active', 84, '2025-06-06 16:42:43.361', '2025-06-06 16:42:43.361', 0, '#000000');
+INSERT INTO `applications` VALUES (283, '魔搭MCP', 'https://g.alicdn.com/sail-web/maas/2.8.10/favicon/128.ico', 'https://modelscope.cn/mcp', '阿里云旗下知名AI开源社区魔搭(ModelScope)近日推出创新的MCP广场，该平台已成为目前最大中文MCP服务聚集地，为AI开发者提供全方位的资源支持。', 'active', 84, '2025-06-06 16:43:08.066', '2025-06-06 16:43:08.066', 0, '#000000');
+INSERT INTO `applications` VALUES (284, '讯飞星辰MCP', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_b4b97c90e25f1.png', 'https://mcp.xfyun.cn/', '在这里轻松获取 MCP 发现优秀的MCP Server', 'active', 84, '2025-06-06 16:43:54.696', '2025-06-06 16:43:54.696', 0, '#000000');
+INSERT INTO `applications` VALUES (285, '探索 MCP Server', 'https://pic2.ziyuan.wang/user/hozh/diy/icofolder/icon_0f30dadf30e13.png', 'https://mcp.so/zh/explore', '探索 MCP Server 和 MCP Client', 'active', 84, '2025-06-16 15:05:14.266', '2025-06-16 16:17:28.010', 0, '#000000');
+INSERT INTO `applications` VALUES (286, 'MD2Card 知识卡片工具', 'https://md2card.cn/favicons/favicon-32x32.png', 'https://md2card.cn/zh', 'MD2Card 是一个免费的 Markdown 转知识卡片工具，支持一键生成小红书风格海报、社交媒体文案排版，让创作者轻松制作精美的图文内容。支持多种主题风格、长文自动拆分、一键导出图片，让你的创作更加高效。', 'active', 44, '2025-06-19 09:48:01.807', '2025-06-19 09:48:46.945', 0, '#000000');
+INSERT INTO `applications` VALUES (287, 'Gmail', 'skill-icons:gmail-light', 'https://mail.google.com/', 'Gmail是Google的免费网络邮件服务', 'active', 45, '2025-07-01 10:32:43.189', '2025-07-01 10:32:43.189', 0, '#000000');
+INSERT INTO `applications` VALUES (288, 'AI 提示生成器', 'humbleicons:ai', 'https://www.aipromptgenerator.net/zh', '使用我们的 AI 提示生成器释放 AI 的力量！\n生成、优化和增强 ChatGPT、Claude、Midjourney、Flux 和 Stable Diffusion 的提示。', 'active', 44, '2025-07-09 17:23:06.237', '2025-07-09 17:23:06.237', 0, '#00D8FF');
+INSERT INTO `applications` VALUES (289, 'NoCode-零代码应用生成平台', 'https://s3plus.meituan.net/nocode-external/assets/nocode.ico', 'https://nocode.cn/', 'NoCode 是一款无需编程背景和经验，通过自然语言和对话形式，即可快速生成应用的平台。可帮助不同角色以\'零代码\'的方式创建个人提效工具、产品原型、可交互页面等，降低开发门槛，实现创意释放。', 'active', 44, '2025-08-27 10:06:44.853', '2025-08-27 10:06:44.853', 0, '#000000');
+INSERT INTO `applications` VALUES (290, 'MasterGo 莫高设计 - AI 时代的数字界面生产平台', 'https://mastergo.com/favicon.ico', 'https://mastergo.com/', 'MasterGo/莫高设计是AI时代企业级产品设计平台，贯穿产品设计研发的全链条在线协作工具,是可协作的在线sketch、国内版figma，提供在线产品设计、原型图制作设计、网页开发设计、产品交互设计、UI和UX设计工具等功能,支持多人实时协作,可快速搭建设计系统,为产品设计师、交互设计师、工程师以及产品经理提供更简单灵活的工作模式。', 'active', 44, '2025-12-11 13:23:27.421', '2025-12-11 13:23:27.421', 0, '#000000');
+INSERT INTO `applications` VALUES (291, '渡渡鸟镜像同步站', 'https://docker.aityp.com/static/images/favicon.ico', 'https://docker.aityp.com/', '渡渡鸟镜像同步站为国内用户提供gcr.io,docker.io等容器镜像查询同步服务', 'active', 54, '2026-03-30 14:35:25.182', '2026-03-30 14:35:25.182', 0, '#000000');
 
 -- ----------------------------
 -- Table structure for menus
@@ -235,7 +245,7 @@ CREATE TABLE `menus`  (
   `icon_color` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL,
   `parent_id` bigint UNSIGNED NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 84 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 85 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menus
@@ -257,6 +267,7 @@ INSERT INTO `menus` VALUES (70, 'GO开发', 'tabler:brand-golang', 'active', '20
 INSERT INTO `menus` VALUES (81, '接口平台', 'hugeicons:api', 'active', '2024-10-17 16:47:03.702', '2024-10-17 16:48:53.302', -3, '#0B4B60', NULL);
 INSERT INTO `menus` VALUES (82, '图标库', 'tabler:icons', 'active', '2024-10-23 15:58:32.123', '2024-10-23 15:58:32.123', 0, '#6530A6', 45);
 INSERT INTO `menus` VALUES (83, '资源导航', 'carbon:software-resource-cluster', 'active', '2024-11-07 13:23:36.524', '2024-11-07 14:20:49.897', -2, '#6530A6', NULL);
+INSERT INTO `menus` VALUES (84, 'MCP网站', 'vscode-icons:file-type-light-mcp', 'active', '2025-06-06 16:40:49.861', '2025-06-06 16:45:21.955', 0, '#CC00F4', 44);
 
 -- ----------------------------
 -- Table structure for site_settings
@@ -278,7 +289,7 @@ CREATE TABLE `site_settings`  (
 -- ----------------------------
 -- Records of site_settings
 -- ----------------------------
-INSERT INTO `site_settings` VALUES (1, 'zh导航', 'https://img1.baidu.com/it/u=1217061905,2277984247&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500', 'zh导航. All Rights Reserved.', '123456', '2024-10-08 16:04:30.063', '2024-10-10 16:53:13.545', '', 'c10cc8537aeae7519d552c5dadaf6343');
+INSERT INTO `site_settings` VALUES (1, 'zh导航', 'emojione:cat', 'zh导航. All Rights Reserved.', '123456', '2024-10-08 16:04:30.063', '2026-03-17 17:13:02.501', '', 'c10cc8537aeae7519d552c5dadaf6343');
 
 -- ----------------------------
 -- Table structure for users
@@ -302,7 +313,7 @@ CREATE TABLE `users`  (
 -- ----------------------------
 -- Records of users
 -- ----------------------------
-INSERT INTO `users` VALUES (1, 'admin', '$2a$14$/N62yD9tfuXSe1QeV25cpuywcUEwQyVweJ.ft9ZB2mU3ZtnaEDl42', '2024-09-11 14:40:40.941', 'enabled', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNzQ4Mzk4MjM4fQ.lHAps4mACzuKVkNPBSoC2Z_kbx0LNJQCvFSVa76SM_M', '2024-09-11 14:40:42.069', '2025-05-27 10:10:38.472', NULL, 1);
-INSERT INTO `users` VALUES (15, 'zh', '$2a$14$3ikAJJvQF/RqURuFt9A3mOrZZv3AKknYeb2xh/59QTQ.qNs1GffjC', '2024-09-12 14:42:11.844', 'disabled', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InpoIiwiZXhwIjoxNzI2ODAyNTQwfQ.dxJ42P5ZckijTn0kIL5nkNNQZIMBkvqEMiBXK0o6Jgk', '2024-09-12 14:42:11.845', '2024-10-15 11:34:19.057', NULL, 0);
+INSERT INTO `users` VALUES (1, 'admin', '$2a$14$/N62yD9tfuXSe1QeV25cpuywcUEwQyVweJ.ft9ZB2mU3ZtnaEDl42', '2024-09-11 14:40:40.941', 'enabled', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNzc0OTM4OTAwfQ.0cnKe4qUH46ZgaGmAUjB8gdeknHoLB4YLwVS3POvNpg', '2024-09-11 14:40:42.069', '2026-03-30 14:35:00.151', NULL, 1);
+INSERT INTO `users` VALUES (15, 'zh', '$2a$14$3ikAJJvQF/RqURuFt9A3mOrZZv3AKknYeb2xh/59QTQ.qNs1GffjC', '2024-09-12 14:42:11.844', 'disabled', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InpoIiwiZXhwIjoxNzI2ODAyNTQwfQ.dxJ42P5ZckijTn0kIL5nkNNQZIMBkvqEMiBXK0o6Jgk', '2024-09-12 14:42:11.845', '2025-08-27 16:54:50.168', NULL, 0);
 
 SET FOREIGN_KEY_CHECKS = 1;
