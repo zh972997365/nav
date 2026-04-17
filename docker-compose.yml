@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  nav-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: nav-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/data:/app/backend/data
+
+  nav-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nav-frontend
+    restart: unless-stopped
+    depends_on:
+      - nav-backend
+    ports:
+      - "80:80"
