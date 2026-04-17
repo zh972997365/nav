@@ -1,36 +1,20 @@
-# Nav
-## Docker部署
-```shell
-### 1.拉取项目
-mkdir /data && cd /data
-git clone https://github.com/zh972997365/nav.git
-cd nav
-### 2.按需修改docker-compose.image.yml文件
+# znav
 
-### 3.运行打包镜像
-docker-compose -f docker-compose.image.yml up -d
+## 当前数据库
 
-### 4.重新构建镜像
-docker-compose -f docker-compose.build.yml up --build -d
+项目当前仅使用 `SQLite`。
 
-### web访问：
-http://你的IP
-admin
-admin
+数据库文件位置：
 
-```
-## K8S部署
-```shell
-### 1.构建服务
-mkdir /data && cd /data
-git clone https://github.com/zhanghao123321/nav.git
-cd nav
-kubectl apply -f mysql-pv.yaml
-kubectl apply -f mysql-deployment.yaml
-kubectl apply -f backend-deployment.yaml
-kubectl apply -f frontend-deployment.yaml
-kubectl apply -f znav-ingress.yaml
+`backend/data/znav.db`
 
-### 2.查看服务
-kubectl get pod,svc,ingress  -n production
-```
+默认管理员账号：
+
+- 用户名：`admin`
+- 密码：`admin`
+
+## 数据备份
+
+备份下面这个文件即可：
+
+`backend/data/znav.db`

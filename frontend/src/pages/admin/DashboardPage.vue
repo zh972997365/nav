@@ -15,8 +15,8 @@
       <section class="dashboard-hero-card">
         <div class="dashboard-hero-card__copy">
           <p class="dashboard-hero-card__eyebrow">System summary</p>
-          <h3>在一个页面里，快速掌握后台当前的整体状态。</h3>
-          <p>这里保留最值得先看的概览数据、结构规模和最近新增内容，帮助你进入后台后马上找到重点。</p>
+          <h3>应用统计</h3>
+          <p>概览数据、结构规模和最近新增内容，帮助你进入后台后马上找到重点。</p>
         </div>
         <div class="dashboard-hero-card__stats">
           <div class="dashboard-mini-stat">

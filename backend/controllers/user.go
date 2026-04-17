@@ -110,8 +110,8 @@ func CreateUser(c *gin.Context) {
 
 	// 设置创建时间
 	now := time.Now()
-	user.CreatedAt = now
-	user.LoginAt = &now
+	user.CreatedAt = models.NewNullableTime(now)
+	user.LoginAt = models.NewNullableTime(now)
 
 	db := database.GetDB()
 	if err := db.Create(&user).Error; err != nil {
