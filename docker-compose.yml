@@ -14,8 +14,8 @@ services:
 
   nav-frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: nav-frontend
     restart: unless-stopped
     depends_on:

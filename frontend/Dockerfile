@@ -1,28 +1,34 @@
-# 使用 Node.js 官方镜像构建前端应用
-FROM node:18 as build
+# ========== 阶段 1：构建前端应用 ==========
+FROM node:18-alpine as build
+
+# 设置国内代理
+RUN npm config set registry https://registry.npmmirror.com
 
 # 设置工作目录
 WORKDIR /app
 
-# 复制 frontend 文件夹的内容到容器中
-COPY . /app
+# 下载依赖文件
+COPY package*.json ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --no-audit --no-fund || \
+    npm install --no-audit --no-fund
 
-# 安装依赖
-RUN npm --registry https://registry.npmmirror.com/ install
+# 复制源码
+COPY . .
 
-# 构建前端应用
-RUN npm --registry https://registry.npmmirror.com/ run build
+# 构建应用
+RUN npm run build
 
-# 使用 Nginx 来部署前端应用
+# ========== 阶段 2：运行环境 ==========
 FROM nginx:alpine
 
-# 拷贝 Nginx 配置文件
+# Nginx配置
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# 复制前端构建产物到 Nginx 的默认目录
+# 构建产物
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# 暴露 Nginx 默认的 80 端口
+# 暴露端口
 EXPOSE 80
 
 # 启动 Nginx
