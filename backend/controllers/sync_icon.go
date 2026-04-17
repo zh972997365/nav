@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"nav/backend/database"
+	"nav/backend/models"
 	"net/http"
 	"time"
-	"znav/backend/database"
-	"znav/backend/models"
 
 	"github.com/gin-gonic/gin"
 )

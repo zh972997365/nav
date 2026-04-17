@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"nav/backend/services"
 	"net/http"
-	"znav/backend/services"
 
 	"github.com/gin-gonic/gin"
 )

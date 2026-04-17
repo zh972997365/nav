@@ -4,11 +4,11 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
+	"nav/backend/database"
+	"nav/backend/models"
+	"nav/backend/utils"
 	"net/http"
 	"strings"
-	"znav/backend/database"
-	"znav/backend/models"
-	"znav/backend/utils"
 )
 
 func AuthMiddleware() gin.HandlerFunc {

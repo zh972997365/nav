@@ -13,7 +13,7 @@ import (
 var DB *gorm.DB
 
 func InitDB() {
-	dbPath := getEnv("DB_PATH", "./data/znav.db")
+	dbPath := getEnv("DB_PATH", "./data/nav.db")
 	if err := os.MkdirAll(filepath.Dir(dbPath), 0o755); err != nil {
 		log.Fatal("Failed to create SQLite data directory: ", err)
 	}

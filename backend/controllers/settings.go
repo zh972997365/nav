@@ -1,9 +1,9 @@
 package controllers
 
 import (
+	"nav/backend/database"
+	"nav/backend/models"
 	"net/http"
-	"znav/backend/database"
-	"znav/backend/models"
 
 	"github.com/gin-gonic/gin"
 )

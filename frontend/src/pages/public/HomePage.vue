@@ -1,1475 +1,750 @@
 <template>
-  <el-container>
-    <!-- 顶部侧边栏 -->
-    <el-header :class="['header-container', { 'header-expanded': !isSidebarVisible }]">
-      <div class="toggle-sidebar-button" @click="toggleSidebar">
-        <!-- 侧边栏切换按钮 -->
-        <icon aria-hidden="true" :icon="'solar:hamburger-menu-bold'" width="45" height="45" color="black" />
-      </div>
+  <div ref="topAnchor" class="home-shell">
+    <header class="home-topbar">
+      <button type="button" class="brand" @click="goToHome">
+        <span class="brand__logo">
+          <img v-if="isUrl(siteSettings.icon)" :src="siteSettings.icon" alt="logo" />
+          <icon
+            v-else
+            :icon="siteSettings.icon || 'solar:planet-outline'"
+            :color="siteSettings.icon_color || '#3f8f94'"
+            width="22"
+            height="22"
+          />
+        </span>
+        <span class="brand__text">
+          <strong>{{ siteSettings.title || 'ZNav' }}</strong>
+          <small>个人导航工作台</small>
+        </span>
+      </button>
 
-      <!-- 热榜区域 -->
-      <div class="hot-rankings-container" @mouseenter="showHotDropdown" @mouseleave="scheduleHideHotDropdown">
-        <icon :icon="'fluent:fire-16-filled'" width="30" height="30" style="margin-right: 5px; color: rgb(187, 12, 12);" />
-        <div class="hotspot-rankings-toggle">今日热榜</div>
-
-        <!-- 热点榜单下拉框 -->
-        <div v-if="hotDropdownVisible" class="rankings-dropdown">
-          <div class="hot-header">
-            <span @click="scrollLeft" class="scroll-button">
-              <icon :icon="'ri:skip-left-line'" width="20" height="20" />
-            </span>
-                    <div class="hot-categories-wrapper">
-                      <div class="hot-categories">
-                    <span v-for="category in categories" :key="category" @click="fetchHotRank(category)" :class="{ 'active': selectedCategory === category }">
-                        {{ category }}
-                    </span>
-                      </div>
-                    </div>
-                    <span @click="scrollRight" class="scroll-button">
-              <icon :icon="'ri:skip-right-line'" width="20" height="20" />
-            </span>
-          </div>
-          <ul class="hot-list">
-            <li v-for="(item, index) in hotRank" :key="item.url" class="hot-item">
-              <div class="item-content">
-                <!-- index 带背景颜色 -->
-                <span class="rank-number" :class="getRankClass(index + 1)">{{ index + 1 }}</span>
-                <a :href="item.url" target="_blank" class="hot-title">{{ item.title }}</a>
-                <span class="hot-value">
-                  {{ item.hot ? (item.hot < 10000 ? item.hot : (item.hot / 10000).toFixed(2) + '万') : '未知' }}
-                </span>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 每日一言 -->
-      <div class="hitokoto" @click="fetchHitokoto" style="cursor: pointer;">
-        <p v-if="hitokoto">{{ hitokoto }}</p>
-        <p v-else>点击获取每日一言</p>
-      </div>
-
-      <!-- 管理员区域 -->
-      <div class="header-actions">
-        <div v-if="isLoggedIn" class="admin-dropdown" @mouseenter="showAdminDropdown" @mouseleave="scheduleHideAdminDropdown">
-          <div class="admin-info">
-            <template v-if="isUrl(siteSettings.icon)">
-              <img :src="siteSettings.icon" :style="{ color: siteSettings.icon_color || '#000' }" width="45" height="45" alt="" />
-            </template>
-            <template v-else>
-              <icon :icon="siteSettings.icon" :color="siteSettings.icon_color || '#000'" width="45" height="45" />
-            </template>
-            <span class="username">管理员</span>
-          </div>
-
-          <!-- 管理员下拉框 -->
-          <div v-if="adminDropdownVisible" class="dropdown-menu" @mouseenter="clearAdminDropdownTimeout" @mouseleave="scheduleHideAdminDropdown">
-            <div class="dropdown-item" @click="goToDashboard">管理后台</div>
-            <div class="dropdown-item" @click="logout">退出登录</div>
-          </div>
-        </div>
-
-        <!-- 登录按钮 -->
-        <div v-else @click="goToLogin" class="login-button">
-          登录
-        </div>
-      </div>
-    </el-header>
-
-    <el-container>
-      <!-- 侧边栏 -->
-      <transition
-        name="sidebar"
-        @before-enter="beforeEnter"
-        @enter="enter"
-        @leave="leave"
-        @after-leave="afterLeave"
-      >
-        <el-aside
-          v-show="isSidebarVisible"
-          ref="sidebar"
-          :class="['sidebar-container', { 'sidebar-hidden': !isSidebarVisible, 'sidebar-shown': isSidebarVisible }]"
-        >
-          <div
-            class="logo"
-            @click="goToHome"
-          >
-            <!-- 判断是否为 URL -->
-            <template v-if="isUrl(siteSettings.icon)">
-              <img
-                :src="siteSettings.icon"
-                :style="{ color: siteSettings.icon_color || '#000' }"
-                width="45"
-                height="45"
-                alt=""
-              >
-            </template>
-            <!-- 如果不是 URL，则使用 Iconify 图标 -->
-            <template v-else>
-              <icon
-                :icon="siteSettings.icon"
-                :color="siteSettings.icon_color || '#000'"
-                width="30"
-                height="30"
-              />
-            </template>
-            <span class="logo-text">{{ siteSettings.title }}</span>
-          </div>
-          <el-menu
-            :default-active="activeMenu"
-            class="el-menu-vertical-demo"
-            unique-opened
-          >
-            <template v-for="menu in menusWithLevels">
-              <div
-                v-if="!menu.parent_id"
-                :key="menu.id"
-                class="menu-item-wrapper"
-              >
-                <el-menu-item
-                  :index="menu.id.toString()"
-                  @click="toggleSubMenu(menu)"
-                >
-                  <template v-if="isUrl(menu.icon)">
-                    <img
-                      :src="menu.icon"
-                      :style="{ color: menu.icon_color || '#000' }"
-                      class="menu-icon"
-                      width="30"
-                      height="30"
-                      alt=""
-                    >
-                  </template>
-                  <template v-else>
-                    <icon
-                      :icon="menu.icon"
-                      :color="menu.icon_color || '#000'"
-                      class="menu-icon"
-                      width="30"
-                      height="30"
-                    />
-                  </template>
-                  <span>{{ menu.title }}</span>
-                  <span
-                    v-if="menu.children.length > 0"
-                    class="submenu-arrow"
-                  >
-                    <icon
-                      v-if="openedMenuId !== menu.id"
-                      :icon="'mingcute:right-line'"
-                      width="14"
-                      height="14"
-                      color="black"
-                    />
-                    <icon
-                      v-if="openedMenuId === menu.id"
-                      :icon="'mingcute:down-line'"
-                      width="14"
-                      height="14"
-                      color="black"
-                    />
-                  </span>
-                </el-menu-item>
-                <el-menu-item
-                  v-for="subMenu in menu.children"
-                  v-show="openedMenuId === menu.id"
-                  :key="subMenu.id"
-                  :index="subMenu.id.toString()"
-                  :style="{ paddingLeft: '40px' }"
-                  @click="handleMenuClick(subMenu)"
-                >
-                  <template v-if="isUrl(subMenu.icon)">
-                    <img
-                      :src="subMenu.icon"
-                      :style="{ color: subMenu.icon_color || '#000' }"
-                      class="menu-icon"
-                      width="30"
-                      height="30"
-                      alt=""
-                    >
-                  </template>
-                  <template v-else>
-                    <icon
-                      :icon="subMenu.icon"
-                      :color="subMenu.icon_color || '#000'"
-                      class="menu-icon"
-                      width="30"
-                      height="30"
-                    />
-                  </template>
-                  <span>{{ subMenu.title }}</span>
-                </el-menu-item>
-              </div>
-            </template>
-          </el-menu>
-        </el-aside>
-      </transition>
-
-      <!-- 主内容区 -->
-      <el-main :class="{'main-container-expanded': !isSidebarVisible, 'main-container': isSidebarVisible}">
+      <div class="topbar-actions">
         <div
-          v-for="menu in menusWithLevels"
-          :id="`menu-${menu.id}`"
-          :key="menu.id"
+          v-if="isLoggedIn"
+          class="user-dropdown"
+          @mouseenter="openUserMenu"
+          @mouseleave="closeUserMenu"
         >
-          <!-- 一级菜单展示 -->
-          <div
-            v-if="!menu.parent_id"
-            class="menu-section"
-          >
-            <h2 class="menu-title">
-              <template v-if="isUrl(menu.icon)">
-                <img
-                  :src="menu.icon"
-                  :style="{ color: menu.icon_color || '#000' }"
-                  class="menu-icon"
-                  width="30"
-                  height="30"
-                  alt=""
-                >
-              </template>
-              <template v-else>
-                <icon
-                  :icon="menu.icon"
-                  :color="menu.icon_color || '#000'"
-                  class="menu-icon"
-                  width="30"
-                  height="30"
-                />
-              </template>
-              {{ menu.title }}
-            </h2>
-            <div class="app-card-container">
-              <el-row
-                :gutter="20"
-                justify="start"
-              >
-                <el-col
-                  v-for="app in filteredApplications(menu.id)"
-                  :key="app.id"
-                  :xs="24"
-                  :sm="12"
-                  :md="8"
-                  :lg="6"
-                  :xl="4"
-                >
-                  <el-card
-                    shadow="hover"
-                    class="app-card"
-                    @mouseover="showDescription(app.id, $event)"
-                    @mouseleave="hideDescription"
-                    @click="handleCardClick(app)"
-                  >
-                    <div class="app-card-content">
-                      <div class="app-icon-container">
-                        <template v-if="isUrl(app.icon)">
-                          <img
-                            :src="app.icon"
-                            :style="{ color: app.icon_color || '#000' }"
-                            class="app-icon"
-                            width="45"
-                            height="45"
-                            alt=""
-                          >
-                        </template>
-                        <template v-else>
-                          <icon
-                            :icon="app.icon"
-                            :color="app.icon_color || '#000'"
-                            class="app-icon"
-                            width="45"
-                            height="45"
-                          />
-                        </template>
-                      </div>
-                      <div class="app-info-container">
-                        <h3 class="app-title">
-                          {{ app.title }}
-                        </h3>
-                        <p class="app-description">
-                          {{ app.description }}
-                        </p>
-                      </div>
-                    </div>
-                  </el-card>
-                  <!-- Teleport 用于在卡片悬停时显示完整描述 -->
-                  <Teleport
-                    v-if="currentAppId === app.id"
-                    to="body"
-                  >
-                    <div
-                      class="app-full-description"
-                      :style="descriptionStyle"
-                    >
-                      <div class="triangle" />
-                      {{ app.description }}
-                    </div>
-                  </Teleport>
-                </el-col>
-              </el-row>
-            </div>
+          <button type="button" class="user-trigger" @click="toggleUserMenu">
+            <span class="user-trigger__avatar">{{ displayUsername.slice(0, 1).toUpperCase() }}</span>
+            <span class="user-trigger__meta">
+              <strong class="user-trigger__name">{{ displayUsername }}</strong>
+              <small class="user-trigger__role">已登录用户</small>
+            </span>
+            <span class="user-trigger__arrow" :class="{ 'is-open': userMenuVisible }">
+              <icon icon="solar:alt-arrow-down-outline" width="16" height="16" />
+            </span>
+          </button>
 
-            <!-- 渲染该一级菜单下的所有二级菜单 -->
-            <div
-              v-for="subMenu in menu.children"
-              :id="`menu-${subMenu.id}`"
-              :key="subMenu.id"
-              class="menu-section"
-            >
-              <h2 class="menu-title sub-menu-title">
-                <template v-if="isUrl(subMenu.icon)">
-                  <img
-                    :src="subMenu.icon"
-                    :style="{ color: subMenu.icon_color || '#000' }"
-                    class="menu-icon"
-                    width="30"
-                    height="30"
-                    alt=""
-                  >
-                </template>
-                <template v-else>
-                  <icon
-                    :icon="subMenu.icon"
-                    :color="subMenu.icon_color || '#000'"
-                    class="menu-icon"
-                    width="30"
-                    height="30"
-                  />
-                </template>
-                {{ subMenu.title }}
-              </h2>
-              <div class="app-card-container">
-                <el-row
-                  :gutter="20"
-                  justify="start"
-                >
-                  <el-col
-                    v-for="app in filteredApplications(subMenu.id)"
-                    :key="app.id"
-                    :xs="24"
-                    :sm="12"
-                    :md="8"
-                    :lg="6"
-                    :xl="4"
-                  >
-                    <el-card
-                      shadow="hover"
-                      class="app-card"
-                      @mouseover="showDescription(app.id, $event)"
-                      @mouseleave="hideDescription"
-                      @click="handleCardClick(app)"
-                    >
-                      <div class="app-card-content">
-                        <div class="app-icon-container">
-                          <template v-if="isUrl(app.icon)">
-                            <img
-                              :src="app.icon"
-                              :style="{ color: app.icon_color || '#000' }"
-                              class="app-icon"
-                              alt=""
-                            >
-                          </template>
-                          <template v-else>
-                            <icon
-                              :icon="app.icon"
-                              :color="app.icon_color || '#000'"
-                              class="app-icon"
-                              width="45"
-                              height="45"
-                            />
-                          </template>
-                        </div>
-                        <div class="app-info-container">
-                          <h3 class="app-title">
-                            {{ app.title }}
-                          </h3>
-                          <p class="app-description">
-                            {{ app.description }}
-                          </p>
-                        </div>
-                      </div>
-                    </el-card>
-                    <Teleport
-                      v-if="currentAppId === app.id"
-                      to="body"
-                    >
-                      <div
-                        class="app-full-description"
-                        :style="descriptionStyle"
-                      >
-                        <div class="triangle" />
-                        {{ app.description }}
-                      </div>
-                    </Teleport>
-                  </el-col>
-                </el-row>
-              </div>
-            </div>
+          <div v-if="userMenuVisible" class="user-menu">
+            <button type="button" class="user-menu__item" @click="goToDashboard">后台管理</button>
+            <button type="button" class="user-menu__item" @click="logout">退出登录</button>
           </div>
         </div>
-        <el-tooltip content="返回顶部" placement="top">
-          <div
-              class="back-to-top"
-              @click="scrollToTop"
-              @mouseenter="iconColor = 'red'"
-              @mouseleave="iconColor = 'black'"
-          >
-            <icon
-                :icon="'ph:rocket-fill'"
-                width="48"
-                height="48"
-                :color="iconColor"
-            />
+        <button v-else type="button" class="soft-btn" @click="goToLogin">登录后台</button>
+      </div>
+    </header>
+
+    <main class="home-main">
+      <section class="toolbar-card">
+        <div class="search-box">
+          <icon icon="solar:magnifer-outline" width="18" height="18" />
+          <input v-model.trim="searchQuery" type="text" placeholder="搜索应用名称、描述或分组" />
+          <button v-if="searchQuery" type="button" @click="searchQuery = ''">清空</button>
+        </div>
+
+      </section>
+
+      <section class="content-layout">
+        <aside class="catalog">
+          <div class="catalog__inner">
+            <p class="catalog__label">目录导航</p>
+            <button
+              v-for="section in sectionSummaries"
+              :key="`nav-${section.id}`"
+              type="button"
+              class="catalog__item"
+              :class="{ 'is-active': activeMenu === String(section.id) }"
+              @click="scrollToMenu(section.id)"
+            >
+              <span>{{ section.title }}</span>
+              <strong>{{ section.count }}</strong>
+            </button>
           </div>
-        </el-tooltip>
-      </el-main>
-      <el-footer class="footer-container">
-        <p>{{ siteSettings.footer }}  ©  <span class="icp">{{ siteSettings.icp }}</span></p>
-      </el-footer>
-    </el-container>
-  </el-container>
+        </aside>
+
+        <div class="sections">
+          <section
+            v-for="section in displaySections"
+            :id="`menu-${section.id}`"
+            :key="section.id"
+            class="section-card"
+          >
+            <div class="section-card__header">
+              <div>
+                <h2>{{ section.title }}</h2>
+                <p>{{ section.description }}</p>
+              </div>
+              <div class="section-card__badge">
+                <span>入口数量</span>
+                <strong>{{ section.totalCount }}</strong>
+              </div>
+            </div>
+
+            <div v-if="section.directApps.length" class="app-grid">
+              <article
+                v-for="app in section.directApps"
+                :key="`app-${app.id}`"
+                class="app-card"
+                @click="handleCardClick(app)"
+              >
+                <div class="app-card__icon">
+                  <img v-if="isUrl(app.icon)" :src="app.icon" alt="" />
+                  <icon
+                    v-else
+                    :icon="app.icon || 'solar:planet-outline'"
+                    :color="app.icon_color || '#3f8f94'"
+                    width="24"
+                    height="24"
+                  />
+                </div>
+                <div class="app-card__content">
+                  <h3>{{ app.title }}</h3>
+                  <p>{{ app.description || '暂无补充说明' }}</p>
+                </div>
+              </article>
+            </div>
+
+            <div
+              v-for="group in section.children"
+              :id="`menu-${group.id}`"
+              :key="`group-${group.id}`"
+              class="subsection"
+            >
+              <div class="subsection__header">
+                <strong>{{ group.title }}</strong>
+                <span>{{ group.apps.length }} 项</span>
+              </div>
+              <div class="app-grid">
+                <article
+                  v-for="app in group.apps"
+                  :key="`subapp-${app.id}`"
+                  class="app-card"
+                  @click="handleCardClick(app)"
+                >
+                  <div class="app-card__icon">
+                    <img v-if="isUrl(app.icon)" :src="app.icon" alt="" />
+                    <icon
+                      v-else
+                      :icon="app.icon || 'solar:planet-outline'"
+                      :color="app.icon_color || '#3f8f94'"
+                      width="24"
+                      height="24"
+                    />
+                  </div>
+                  <div class="app-card__content">
+                    <h3>{{ app.title }}</h3>
+                    <p>{{ app.description || '暂无补充说明' }}</p>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <el-empty v-if="!displaySections.length" description="当前搜索没有匹配结果" />
+        </div>
+      </section>
+    </main>
+
+    <button type="button" class="backtop" @click="scrollToTop">返回顶部</button>
+
+    <footer class="home-footer">
+      <p>{{ siteSettings.footer || '个人导航首页' }}</p>
+      <span>{{ siteSettings.icp || '未配置备案信息' }}</span>
+    </footer>
+  </div>
 </template>
 
 <script>
-import { Icon } from '@iconify/vue';
 import axios from 'axios';
+import { mapGetters } from 'vuex';
+import { Icon } from '@iconify/vue';
+
+const PAGE_SIZE = 100;
 
 export default {
-  components: {
-    Icon,
-  },
+  components: { Icon },
   data() {
     return {
-      hitokoto: '', // 保存每日一言
-      hotRank: [], // 存储热榜数据
-      selectedCategory: '百度', // 默认选中的热榜类别
-      categories: [
-        "百度", "微博", "知乎", "抖音", "今日头条", "哔哩哔哩", "HelloGitHub", "51CTO", "CSDN", "稀土掘金",
-        "少数派", "IT之家", "百度贴吧", "澎湃新闻", "网易新闻", "中央气象台", "中国地震台",
-        "豆瓣电影", "爱范儿", "英雄联盟", "AcFun", "微信读书", "NGA", "历史上的今天"
-      ],
-      scrollPosition: 0,
-      menus: [], // 菜单数据
-      applications: [], // 应用数据
-      currentAppId: null, // 当前悬停的卡片的应用 ID
-      descriptionStyle: { top: '0px', left: '0px' }, // 下拉框的样式
-      activeMenu: '', // 当前激活的菜单项
-      searchQuery: '', // 搜索框内容
-      isSidebarVisible: true, // 控制侧边栏是否可见
-      sidebarOpeningRight: false,
-      dropdownVisible: false,
-      openedMenuId: null, // 当前展开的一级菜单ID
-      hotDropdownVisible: false,  // 控制热点榜单下拉框的显示
-      adminDropdownVisible: false,  // 控制管理员下拉框的显示
-      hotDropdownTimeout: null,  // 控制热点榜单下拉框隐藏的定时器
-      adminDropdownTimeout: null,  // 控制管理员下拉框隐藏的定时器
-      iconColor: 'black',
+      menus: [],
+      applications: [],
+      activeMenu: '',
+      searchQuery: '',
+      userMenuVisible: false,
+      userMenuCloseTimer: null,
     };
   },
   computed: {
+    ...mapGetters(['siteSettings', 'username']),
     isLoggedIn() {
-      return !!this.$store.state.token; // 检查用户是否已登录
+      return !!this.$store.state.token;
     },
-    siteSettings() {
-      return this.$store.getters.siteSettings || {
-        title: 'zh导航',
-        icon: 'https://img1.baidu.com/it/u=1217061905,2277984247&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
-        icp: '123456',
-        footer: 'zh导航. All Rights Reserved.'
-      };
+    displayUsername() {
+      return this.username || 'admin';
     },
-    menusWithLevels() {
-      const addLevel = (menus, parentId = null, level = 0) => {
-        return menus
-            .filter(menu => menu.parent_id === parentId)
-            .map(menu => {
-              const children = addLevel(menus, menu.id, level + 1);
-              return {
-                ...menu,
-                level,
-                children,
-              };
-            });
-      };
-      return addLevel(this.menus);
+    activeApplications() {
+      return this.applications
+        .filter((app) => String(app.status || '').toLowerCase() === 'active')
+        .sort((a, b) => this.normalizeOrder(a.order_id) - this.normalizeOrder(b.order_id));
+    },
+    topLevelMenus() {
+      return this.buildTree();
+    },
+    sectionSummaries() {
+      return this.topLevelMenus
+        .map((menu) => ({ ...menu, count: this.countSectionApps(menu) }))
+        .filter((menu) => menu.count > 0);
+    },
+    displaySections() {
+      const keyword = this.searchQuery.toLowerCase();
+      return this.topLevelMenus
+        .map((menu) => {
+          const directApps = this.filterAppsByMenu(menu.id, keyword);
+          const children = (menu.children || [])
+            .map((child) => ({ ...child, apps: this.filterAppsByMenu(child.id, keyword) }))
+            .filter((child) => child.apps.length > 0 || this.matchesKeyword(child.title, keyword));
+          const totalCount = directApps.length + children.reduce((sum, child) => sum + child.apps.length, 0);
+
+          if (!keyword || this.matchesKeyword(menu.title, keyword) || totalCount > 0) {
+            return {
+              ...menu,
+              description: menu.children.length
+                ? `当前分组下包含 ${menu.children.length} 个子类，已展示 ${totalCount} 个可用入口。`
+                : `聚合这一类常用入口，当前共展示 ${totalCount} 个可用应用。`,
+              directApps,
+              children,
+              totalCount,
+            };
+          }
+
+          return null;
+        })
+        .filter((section) => section && section.totalCount > 0);
+    },
+    visibleApplicationCount() {
+      return this.displaySections.reduce((sum, section) => sum + section.totalCount, 0);
     },
   },
   created() {
     this.fetchMenus();
-    this.fetchAllApplications(); // 一次性获取所有数据
+    this.fetchAllApplications();
     this.$store.dispatch('fetchSiteSettings');
-    this.fetchHitokoto(); // 页面加载时获取每日一言
-    this.fetchHotRank('百度'); // 初始化百度栏目的数据
+    if (this.isLoggedIn) {
+      this.$store.dispatch('fetchUserData').catch(() => {});
+    }
   },
   methods: {
-    getRankClass(index) {
-      // 返回不同的 CSS 类
-      if (index === 1) return 'rank-first';
-      if (index === 2) return 'rank-second';
-      if (index === 3) return 'rank-third';
-      return 'rank-default';
-    },
-    // 热点榜单下拉框显示/隐藏逻辑
-    showHotDropdown() {
-      this.clearHotDropdownTimeout();
-      this.hotDropdownVisible = true;
-    },
-    scheduleHideHotDropdown() {
-      this.hotDropdownTimeout = setTimeout(() => {
-        this.hotDropdownVisible = false;
-      }, 300); // 延迟300ms隐藏
-    },
-    clearHotDropdownTimeout() {
-      if (this.hotDropdownTimeout) {
-        clearTimeout(this.hotDropdownTimeout);
-        this.hotDropdownTimeout = null;
+    openUserMenu() {
+      if (this.userMenuCloseTimer) {
+        clearTimeout(this.userMenuCloseTimer);
+        this.userMenuCloseTimer = null;
       }
+      this.userMenuVisible = true;
     },
-
-    // 管理员下拉框显示/隐藏逻辑
-    showAdminDropdown() {
-      this.clearAdminDropdownTimeout();
-      this.adminDropdownVisible = true;
+    closeUserMenu() {
+      this.userMenuCloseTimer = window.setTimeout(() => {
+        this.userMenuVisible = false;
+        this.userMenuCloseTimer = null;
+      }, 180);
     },
-    scheduleHideAdminDropdown() {
-      this.adminDropdownTimeout = setTimeout(() => {
-        this.adminDropdownVisible = false;
-      }, 300); // 延迟300ms隐藏
-    },
-    clearAdminDropdownTimeout() {
-      if (this.adminDropdownTimeout) {
-        clearTimeout(this.adminDropdownTimeout);
-        this.adminDropdownTimeout = null;
+    toggleUserMenu() {
+      if (this.userMenuCloseTimer) {
+        clearTimeout(this.userMenuCloseTimer);
+        this.userMenuCloseTimer = null;
       }
+      this.userMenuVisible = !this.userMenuVisible;
     },
-    fetchHitokoto() {
-      axios.get(`${process.env.VUE_APP_API_URL}/hitokoto`)
-          .then(response => {
-            this.hitokoto = response.data.hitokoto; // 保存每日一言
-          })
-          .catch(error => {
-            console.error('Error fetching hitokoto:', error);
-          });
+    isUrl(value) {
+      return /^(http|https):\/\//.test(value || '');
     },
-    fetchHotRank(category) {
-      this.selectedCategory = category; // 更新选中的类别
-      axios.get(`${process.env.VUE_APP_API_URL}/hotrank`, {
-        params: { category: this.selectedCategory }
-      })
-          .then(response => {
-            this.hotRank = response.data; // 更新热榜数据
-          })
-          .catch(error => {
-            console.error('Error fetching hot rank:', error);
-          });
-    },
-    scrollLeft() {
-      const wrapper = this.$el.querySelector(".hot-categories-wrapper");
-      const scrollAmount = wrapper.clientWidth; // 可见区域的宽度，即一页的宽度
-      const currentScroll = wrapper.scrollLeft; // 当前滚动位置
-
-      // 计算新的滚动位置（向左翻一页）
-      const newScrollPosition = Math.max(currentScroll - scrollAmount, 0);
-
-      // 如果当前已经在第一页，则不再滚动
-      if (currentScroll === 0) {
-        return;
+    normalizeId(value) {
+      if (value === undefined || value === null || value === '') {
+        return null;
       }
 
-      // 滚动到新的位置
-      wrapper.scrollTo({ left: newScrollPosition, behavior: "smooth" });
+      const normalized = Number(value);
+      return Number.isNaN(normalized) ? String(value) : normalized;
     },
-
-    scrollRight() {
-      const wrapper = this.$el.querySelector(".hot-categories-wrapper");
-      const scrollAmount = wrapper.clientWidth; // 可见区域的宽度，即一页的宽度
-      const currentScroll = wrapper.scrollLeft; // 当前滚动位置
-      const maxScroll = wrapper.scrollWidth - wrapper.clientWidth; // 最大滚动距离
-
-      // 计算新的滚动位置（向右翻一页）
-      const newScrollPosition = Math.min(currentScroll + scrollAmount, maxScroll);
-
-      // 如果已经到达最后一页，则不再滚动
-      if (currentScroll >= maxScroll) {
-        return;
-      }
-
-      // 滚动到新的位置
-      wrapper.scrollTo({ left: newScrollPosition, behavior: "smooth" });
+    normalizeOrder(value) {
+      const normalized = Number(value);
+      return Number.isNaN(normalized) ? 0 : normalized;
     },
-    scrollToTop() {
-      this.$nextTick(() => {
-        // 获取实际滚动容器
-        const scrollContainer = document.querySelector('.main-container');
-
-        if (scrollContainer) {
-          // 使用 scrollIntoView 实现平滑滚动
-          scrollContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          console.error("Unable to find the scroll container.");
-        }
+    normalizeParentId(parentId) {
+      const normalized = this.normalizeId(parentId);
+      return normalized === 0 ? null : normalized;
+    },
+    matchesKeyword(value, keyword) {
+      if (!keyword) return true;
+      return String(value || '').toLowerCase().includes(keyword);
+    },
+    buildTree(parentId = null) {
+      return this.menus
+        .filter((menu) => this.normalizeParentId(menu.parent_id) === this.normalizeId(parentId))
+        .sort((a, b) => this.normalizeOrder(a.order_id) - this.normalizeOrder(b.order_id))
+        .map((menu) => ({
+          ...menu,
+          children: this.buildTree(menu.id),
+        }));
+    },
+    countSectionApps(menu) {
+      const direct = this.activeApplications.filter((app) => this.normalizeId(app.menu_id) === this.normalizeId(menu.id)).length;
+      const children = (menu.children || []).reduce((sum, child) => sum + this.countSectionApps(child), 0);
+      return direct + children;
+    },
+    filterAppsByMenu(menuId, keyword = '') {
+      return this.activeApplications.filter((app) => {
+        if (this.normalizeId(app.menu_id) !== this.normalizeId(menuId)) return false;
+        if (!keyword) return true;
+        return [app.title, app.description].some((field) => this.matchesKeyword(field, keyword));
       });
     },
-    isUrl(string) {
-      return string.startsWith('http://') || string.startsWith('https://');
-    },
-    fetchMenus() {
+    async fetchPaged(endpoint, listKey) {
       let page = 1;
-      const limit = 100; // 假设每页的菜单数据为100条，可以根据实际情况调整
-      const fetchPage = () => {
-        axios.get(`${process.env.VUE_APP_API_URL}/menus`, {
-          headers: { Authorization: `Bearer ${this.$store.state.token}` },
-          params: {
-            page,
-            limit,
-          },
-        })
-            .then((response) => {
-              const newMenus = response.data.menus;
-              if (newMenus.length > 0) {
-                // 过滤掉状态为“停用”的菜单
-                const activeMenus = newMenus.filter(menu => menu.status === 'active');
-                this.menus = [...this.menus, ...activeMenus].sort((a, b) => a['order_id'] - b['order_id']);
-                page++;
-                fetchPage(); // 递归调用以获取下一页数据
-              }
-            })
-            .catch((error) => {
-              console.error('Error fetching menus:', error);
-            });
-      };
-      fetchPage();
-    },
-    fetchAllApplications() {
-      let page = 1;
-      const limit = 100;
-      const fetchPage = () => {
-        axios.get(`${process.env.VUE_APP_API_URL}/applications`, {
-          headers: { Authorization: `Bearer ${this.$store.state.token}` },
-          params: {
-            page,
-            limit,
-          },
-        })
-            .then((response) => {
-              const newApplications = response.data.applications;
-              if (newApplications.length > 0) {
-                this.applications = [...this.applications, ...newApplications]
-                    .sort((a, b) => a['order_id'] - b['order_id']);
-                page++;
-                fetchPage();
-              }
-            })
-            .catch((error) => {
-              console.error('Error fetching applications:', error);
-            });
-      };
-      fetchPage();
-    },
-    filteredApplications(menuId) {
-      return this.applications.filter(
-          app => app.menu_id === menuId && app.status === 'active'
-      );
-    },
-    showDescription(appId, event) {
-      this.currentAppId = appId;
-      const rect = event.currentTarget.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const shouldShowAbove = rect.bottom + 100 > viewportHeight;
+      let total = 0;
+      const items = [];
 
-      this.descriptionStyle = {
-        top: shouldShowAbove ? `${rect.top - 10}px` : `${rect.bottom + 10}px`,
-        left: `${rect.left + rect.width / 2 - 118}px`,
-        transform: shouldShowAbove ? 'translateY(-100%)' : 'translateY(0)',
-      };
+      do {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}${endpoint}`, {
+          params: {
+            page,
+            pageSize: PAGE_SIZE,
+          },
+        });
+
+        const batch = Array.isArray(response.data[listKey]) ? response.data[listKey] : [];
+        total = Number(response.data.total || 0);
+        items.push(...batch);
+        page += 1;
+
+        if (batch.length === 0) {
+          break;
+        }
+      } while (items.length < total);
+
+      return items;
     },
-    hideDescription() {
-      this.currentAppId = null;
+    async fetchMenus() {
+      try {
+        const menus = await this.fetchPaged('/menus', 'menus');
+        this.menus = menus.filter((menu) => String(menu.status || '').toLowerCase() === 'active');
+      } catch (error) {
+        console.error('Failed to fetch menus:', error);
+      }
+    },
+    async fetchAllApplications() {
+      try {
+        this.applications = await this.fetchPaged('/applications', 'applications');
+      } catch (error) {
+        console.error('Failed to fetch applications:', error);
+      }
     },
     handleCardClick(app) {
-      window.open(app.link, '_blank');
-    },
-    handleMenuClick(menu) {
-      this.activeMenu = menu.id.toString();
-      this.scrollToMenu(menu.id);
+      if (app.link) {
+        window.open(app.link, '_blank', 'noopener');
+      }
     },
     scrollToMenu(menuId) {
+      this.activeMenu = String(menuId);
       this.$nextTick(() => {
-        const element = document.getElementById(`menu-${menuId}`);
-        if (element) {
-          element.style.scrollMarginTop = '90px';
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          window.setTimeout(() => {
-            element.style.scrollMarginTop = '';
-          }, 1000);
-        } else {
-          console.error(`Element not found for menuId: ${menuId}`);
+        const target = document.getElementById(`menu-${menuId}`);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       });
     },
-    toggleSidebar() {
-      if (this.isSidebarVisible) {
-        this.sidebarOpeningRight = false;
-        this.isSidebarVisible = false;
-      } else {
-        this.sidebarOpeningRight = true;
-        this.isSidebarVisible = true;
+    scrollToTop() {
+      const target = this.$refs.topAnchor;
+      if (target && typeof target.scrollIntoView === 'function') {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
       }
-    },
-    beforeEnter(el) {
-      el.style.transform = 'translateX(-100%)'; // 初始状态下隐藏在左侧
-    },
-    enter(el, done) {
-      requestAnimationFrame(() => {
-        el.style.transition = 'transform 0.5s ease-in-out';
-        el.style.transform = 'translateX(0)';
-        done();
-      });
-    },
-    leave(el, done) {
-      el.style.transition = 'transform 0.5s ease-in-out';
-      el.style.transform = 'translateX(-100%)';
 
-      // 延迟调用 done()，确保动画完成后再结束
-      setTimeout(() => {
-        done();
-      }, 500); // 500ms 与动画持续时间保持一致
-    },
-    afterLeave(el) {
-      el.style.display = 'none'; // 完成后确保隐藏
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
     },
     goToLogin() {
       this.$router.push('/login');
     },
     goToDashboard() {
-      window.open('/dashboard', '_blank'); // 在新标签页中打开管理后台
+      this.userMenuVisible = false;
+      this.$router.push('/dashboard');
     },
     logout() {
+      this.userMenuVisible = false;
       this.$store.commit('clearToken');
       this.$router.push('/');
     },
     goToHome() {
-      window.location.reload();
+      this.scrollToTop();
     },
-    showDropdown() {
-      if (this.hideTimeout) {
-        clearTimeout(this.hideTimeout);
-        this.hideTimeout = null;
-      }
-      this.dropdownVisible = true;
-    },
-    hideDropdown() {
-      this.hideTimeout = setTimeout(() => {
-        this.dropdownVisible = false;
-      }, 300); // 延迟 300 毫秒隐藏
-    },
-    toggleSubMenu(menu) {
-      if (this.openedMenuId === menu.id) {
-        this.openedMenuId = null;
-      } else {
-        this.openedMenuId = menu.id;
-      }
-      this.scrollToMenu(menu.id);
-    },
-  }
+  },
 };
 </script>
 
-<style>
-body {
-  background-color: #f4f5f7;
-  margin: 0;
-  font-family: 'Arial', sans-serif;
-  overflow: auto;
+<style scoped>
+.home-shell { min-height: 100vh; padding: 22px; color: var(--admin-text); }
+.home-topbar, .toolbar-card, .catalog__inner, .section-card {
+  border: 1px solid rgba(255,255,255,.78);
+  background: rgba(255,255,255,.84);
+  box-shadow: var(--admin-shadow-sm);
+  backdrop-filter: blur(16px);
 }
-
-.submenu-arrow {
-  float: right;
-  margin-right: 10px;
-}
-
-.header-container {
-  background-color: #ffffff;
+.home-topbar {
+  position: sticky;
+  top: 16px;
+  z-index: 20;
+  width: min(1480px,100%);
+  margin: 0 auto 18px;
+  min-height: 78px;
+  padding: 14px 16px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: 0 15px;
+  gap: 18px;
+  border-radius: 28px;
+}
+.brand {
+  padding: 0;
+  display: inline-flex;
   align-items: center;
-  border-bottom: 1px solid #ebeef5;
-  position: fixed;
-  top: 0;
-  left: 200px;
-  z-index: 100;
-  width: calc(100% - 200px);
-  height: 80px;
-  transition: left 0.5s ease-in-out, width 0.5s ease-in-out;
+  gap: 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
 }
-
-.header-expanded {
-  left: 0;
-  width: 100%;
+.brand__logo {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(99,179,181,.12), rgba(125,211,252,.1));
+  overflow: hidden;
 }
-
-.sidebar-container {
-  background-color: #ffffff;
-  color: #333333;
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  overflow-y: auto;
-  border-right: 1px solid #ebeef5;
-  width: 200px;
-  transform: translateX(0);
-  transition: transform 0.5s ease-in-out;
+.brand__logo img, .app-card__icon img { width: 100%; height: 100%; object-fit: cover; }
+.brand__text { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.brand__text strong { font-size: 18px; }
+.brand__text small, .metric-card p, .section-card__header p, .app-card__content p, .home-footer, .section-card__badge span {
+  color: var(--admin-text-soft);
 }
-
-.sidebar-hidden {
-  transform: translateX(-100%);
-}
-
-.sidebar-shown {
-  transform: translateX(0);
-}
-
-.main-container, .main-container-expanded {
-  transition: margin-left 0.5s ease-in-out;
-}
-
-.main-container {
-  padding: 20px;
-  margin-left: 200px;
-  padding-top: 84px;
-}
-
-.main-container-expanded {
-  padding: 20px;
-  margin-left: 0;
-  padding-top: 84px;
-}
-
-.toggle-sidebar-button {
-  margin-right: 20px;
-}
-
-.logo {
+.topbar-actions {
   display: flex;
   align-items: center;
-  padding: 20px;
-  cursor: pointer; /* 添加手型光标，指示可以点击 */
+  justify-content: flex-end;
+  gap: 10px;
 }
-
-.logo-img {
-  width: 40px;
-  height: 40px;
+.soft-btn, .ghost-btn, .logout-btn, .backtop, .user-trigger, .user-menu__item {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--admin-transition);
 }
-
-.logo-text {
-  font-size: 20px;
-  font-weight: bold;
-  margin-left: 10px;
+.soft-btn, .backtop {
+  border: none;
+  color: #fff;
+  background: linear-gradient(135deg, #63b4b1, #478f95);
+  box-shadow: 0 14px 28px rgba(71,143,149,.16);
 }
-
-.header-actions {
-  display: flex;
-  align-items: center;
+.ghost-btn, .logout-btn, .user-trigger, .user-menu__item {
+  border: 1px solid var(--admin-border);
+  background: rgba(255,255,255,.78);
+  color: var(--admin-text);
 }
-
-.avatar {
-  margin-right: 10px;
+.logout-btn {
+  color: #9f1239;
+  border-color: #fbcfe8;
+  background: #fff7fb;
 }
-
-.username {
-  font-weight: bold;
-  color: #000;
-  padding-left: 10px;
+.soft-btn:hover, .ghost-btn:hover, .logout-btn:hover, .catalog__item:hover, .app-card:hover, .user-trigger:hover, .user-menu__item:hover {
+  transform: translateY(-1px);
 }
-
-.el-menu-vertical-demo:not(.el-menu--collapse) {
-  width: 100%;
-  min-height: 400px;
-  border-right: 0;
-  font-weight: bold;
-}
-
-.el-header {
-  --el-header-padding: 0 20px;
-  --el-header-height: 80px;
-  box-sizing: border-box;
-  flex-shrink: 0;
-  height: var(--el-header-height);
-  padding: var(--el-header-padding);
-}
-
-.menu-icon {
-  width: 30px !important;
-  height: 30px !important;
-  margin-right: 10px !important;
-  vertical-align: middle !important;
-  -o-object-fit: cover !important;
-  object-fit: cover !important;
-  box-shadow: none !important;
-}
-
-.app-card {
+.user-dropdown {
   position: relative;
   display: flex;
   align-items: center;
-  padding: 0;
-  margin-bottom: 20px;
-  height: 100px;
-  border-radius: 10px;
-  cursor: pointer;
+  width: fit-content;
 }
-
-.app-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-.app-title {
-  font-size: 1rem !important;
-  margin: 0 !important;
-  white-space: nowrap !important; /* 不换行 */
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  font-weight: 700 !important;
-  max-width: 100% !important;
-  display: inline-block !important;
-  margin-top: 25px !important;
-  transition: color 0.3s ease !important;
-}
-
-.app-card:hover .app-title {
-  color: red;
-}
-
-.app-card-content {
-  display: flex;
+.user-trigger {
+  min-width: 20px;
+  padding: 8px 12px 8px 10px;
+  display: inline-flex;
   align-items: center;
-  width: 100%;
+  gap: 10px;
+  justify-content: flex-start;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(243,250,251,.96));
+  box-shadow: inset 0 0 0 1px rgba(220, 235, 237, 0.9);
 }
-
-.app-icon-container {
-  flex: 0 0 40px;
-  display: flex;
+.user-trigger__avatar {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #63b4b1, #478f95);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
-
-.app-icon {
-  width: 45px;
-  height: 45px;
-  object-fit: cover;
-  border-radius: 100%;
-  box-shadow: 0 2px 4px rgb(255 255 255 / 10%);
-}
-
-.app-info-container {
+.user-trigger__meta {
+  min-width: 0;
+  display: flex;
   flex: 1;
-  padding-left: 10px;
-  display: flex;
   flex-direction: column;
-  justify-content: center;
-  height: 100%;
+  align-items: flex-start;
+  gap: 2px;
 }
-
-.app-description {
-  margin-top: 10px;
-  font-size: .75rem;
-  color: rgb(156 163 175);
+.user-trigger__name {
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  line-height: 1.2;
+}
+.user-trigger__role {
+  color: var(--admin-text-faint);
+  font-size: 11px;
+  line-height: 1.2;
+}
+.user-trigger__arrow {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(234, 246, 247, 0.9);
+  color: var(--admin-primary);
+  flex-shrink: 0;
+  transition: transform var(--admin-transition), background var(--admin-transition);
+}
+.user-trigger__arrow.is-open {
+  transform: rotate(180deg);
+}
+.user-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 100%;
+  min-width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--admin-border);
+  border-radius: 20px;
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 18px 32px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(18px);
+}
+.user-menu__item {
+  width: 100%;
+  min-height: 42px;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(255,255,255,.85);
+}
+.home-main { width: min(1480px,100%); margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.toolbar-card {
+  padding: 20px;
+  border-radius: 30px;
+}
+.search-box {
+  min-height: 56px;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border-radius: 20px;
+  border: 1px solid var(--admin-border);
+  background: rgba(255,255,255,.92);
+}
+.search-box input, .search-box button {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+}
+.search-box button { cursor: pointer; color: var(--admin-text-soft); }
+.metric-grid { margin-top: 18px; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+.metric-card, .catalog__item, .app-card, .section-card__badge {
+  border: 1px solid var(--admin-border);
+  background: rgba(255,255,255,.82);
+}
+.metric-card {
+  padding: 18px;
+  border-radius: 22px;
+}
+.metric-card span, .subsection__header span {
+  font-size: 12px;
+  color: var(--admin-text-faint);
+}
+.metric-card strong, .section-card__badge strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 32px;
+  line-height: 1;
+}
+.content-layout { display: grid; grid-template-columns: 260px minmax(0,1fr); gap: 18px; align-items: start; }
+.catalog { position: sticky; top: 24px; }
+.catalog__inner {
+  padding: 20px;
+  border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.catalog__label {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--admin-primary);
+}
+.catalog__item {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all var(--admin-transition);
+  text-align: left;
+}
+.catalog__item.is-active {
+  background: var(--admin-primary-soft);
+  color: var(--admin-primary);
+  border-color: rgba(63,143,148,.16);
+}
+.sections { display: grid; gap: 18px; }
+.section-card {
+  padding: 20px;
+  border-radius: 30px;
+}
+.section-card__header, .subsection__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.section-card__header h2, .app-card__content h3, .subsection__header strong { margin: 0; }
+.section-card__header h2 {
+  font-size: 22px;
+  line-height: 1.15;
+}
+.section-card__header p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.section-card__badge {
+  min-width: 110px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  text-align: right;
+}
+.app-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+  gap: 14px;
+}
+.app-card {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  align-items: center;
+  gap: 14px;
+  border-radius: 22px;
+  cursor: pointer;
+  transition: all var(--admin-transition);
+}
+.app-card__icon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: #eef8f8;
+  overflow: hidden;
+}
+.app-card__content p {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.7;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  word-break: break-all;
-  line-height: 1.4em;
-  min-height: 36px;
-}
-
-.app-full-description {
-  position: absolute;
-  background-color: #444;
-  color: white;
-  font-family: 'Microsoft YaHei', 'Arial', sans-serif;
-  padding: 10px;
-  border-radius: 5px;
-  z-index: 99999;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  font-size: 0.78rem;
-  line-height: 1.5;
-  width: 220px;
-  max-width: 220px;
-  white-space: normal;
-  transform-origin: bottom;
-}
-
-.triangle {
-  position: absolute;
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-bottom: 8px solid #444;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.app-full-description[style*="translateY(-100%)"] .triangle {
-  top: auto;
-  bottom: -6px;
-  border-bottom: none;
-  border-top: 8px solid #444;
-}
-
-.app-category-section {
-  margin-bottom: 40px;
-}
-
-.section-icon {
-  width: 24px;
-  height: 24px;
-  margin-right: 10px;
-  vertical-align: middle;
-}
-
-.login-button {
-  background-color: transparent;
-  border-color: #000 !important;
-  color: #000 !important;
-  border-radius: 15px;
-  padding: 10px 20px;
-  font-weight: bold;
-  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
-  box-shadow: none !important;
-  outline: none !important; /* 移除 outline */
-}
-
-.login-button:hover {
-  background-color: #000 !important;
-  color: #fff !important;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5) !important;
-  border-color: #000 !important;
-}
-
-.login-button:focus {
-  outline: none !important; /* 确保按钮在获得焦点时没有 outline */
-}
-
-.admin-dropdown {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.admin-info {
-  display: flex;
-  align-items: center;
-}
-
-.avatar {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-.username {
-  font-weight: bold;
-  color: #000;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 10px); /* 调整菜单位置，留出箭头的空间 */
-  right: 0;
-  background-color: #fff;
-  border: 1px solid #ebeef5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  width: 100px;
-  margin-top: 5px;
-  border-radius: 10px;
-  padding-top: 11px; /* 给菜单内容留出空间放箭头 */
-  font-size: 0.9rem;
-}
-
-/* 增加三角形箭头 */
-.dropdown-menu::before {
-  content: '';
-  position: absolute;
-  top: -10px; /* 三角形的底部与菜单顶部对齐 */
-  right: 10px; /* 可以根据需要调整箭头的位置 */
-  border-width: 0 6px 6px 6px; /* 创建三角形的宽度 */
-  border-style: solid;
-  border-color: transparent transparent #fff transparent; /* 使箭头颜色与菜单背景一致 */
-  z-index: 1001; /* 确保箭头在菜单之上 */
-}
-
-.dropdown-menu::after {
-  content: '';
-  position: absolute;
-  top: -10px; /* 三角形的底部与菜单顶部对齐 */
-  right: 40%; /* 可以根据需要调整箭头的位置 */
-  border-width: 0 8px 8px 8px; /* 创建三角形的宽度 */
-  border-style: solid;
-  border-color: transparent transparent #ebeef5 transparent; /* 使箭头颜色与边框一致 */
-  z-index: 1000; /* 确保箭头的边框在菜单之上 */
-}
-
-.dropdown-item {
-  padding: 10px;
-  cursor: pointer;
-  text-align: center;
-}
-
-.dropdown-item:hover {
-  background-color: rgba(0,82,255,0.16);
-  color: rgba(0,79,255,0.55);
-}
-
-.el-menu-item * {
-  float: right;
-  margin-right: 0px;
-}
-
-.app-category-section h2 {
-  padding-left: 0;
-}
-
-.app-category-section h2[style*="padding-left"] {
-  padding-left: 10px; /* 使二级菜单与一级菜单对齐 */
-}
-
-.menu-section {
-  margin-bottom: 40px; /* 统一每个菜单的底部间距 */
-}
-
-.menu-title {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px; /* 菜单标题与内容之间的间距 */
-}
-
-.menu-icon {
-  margin-right: 10px;
-  width: 30px;
-  height: 30px;
-  object-fit: cover;
-}
-
-.app-card-container {
-  margin-bottom: 20px; /* 卡片容器与下一个菜单的间距 */
-}
-
-.menu-item-wrapper {
-  border-bottom: 1px solid #ebeef5; /* 设置分割线的颜色 */
-}
-
-.menu-item-wrapper:last-child {
-  border-bottom: none; /* 可选：最后一个菜单项不显示分割线 */
-}
-
-.slide-fade-enter-active, .slide-fade-leave-active {
-  transition: all 0.3s ease;
-}
-
-.slide-fade-enter, .slide-fade-leave-to /* .slide-fade-leave-active in <2.1.8 */ {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.icp {
-  text-decoration: underline;
-}
-
-.back-to-top {
-  position: fixed;
-  bottom: 80px;
-  right: 25px;
-  z-index: 1000;
-  cursor: pointer;
-  transition: opacity 0.3s ease;
-}
-
-.back-to-top:hover {
-  opacity: 0.8;
-}
-
-.hitokoto {
-  width: auto; /* 自动根据内容调整宽度 */
-  max-width: 40%; /* 设置最大宽度，防止超出 */
-  text-align: left;
-  font-size: 0.9rem;
-  color: #333;
-  cursor: pointer;
-  margin-left: auto; /* 将 hitokoto 向右对齐 */
-  margin-right: auto; /* 同时在右边也保持居中对齐 */
-  white-space: normal; /* 允许文字换行 */
-  flex-grow: 1; /* 使 hitokoto 在导航栏中占据可用空间 */
-}
-
-.hitokoto-text {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2; /* 限制最多显示两行 */
-  overflow: hidden; /* 超出部分隐藏 */
-  text-overflow: ellipsis; /* 超出部分显示省略号 */
-  white-space: normal; /* 允许换行 */
-  word-break: break-word; /* 长词语自动换行 */
-}
-
-.hitokoto:hover {
-  color: rgba(43,80,118,0.71); /* 悬停时更改颜色，提供视觉反馈 */
-}
-
-/* 外部容器 */
-.hot-rankings-container {
-  display: flex;
-  align-items: center;
-  padding-right: 20px; /* 使其靠右 */
-  position: relative;
-}
-
-/* 外部容器 */
-.hot-rankings-container {
-  display: flex;
-  align-items: center;
-  padding-right: 20px; /* 使其靠右 */
-  position: relative;
-}
-
-/* 热点榜单字样 */
-.hotspot-rankings-toggle {
-  cursor: pointer;
-  font-weight: bold;
-  color: black; /* 字体颜色为黑色 */
-  font-size: 16px;
-}
-
-/* 一个统一的下拉框 */
-.rankings-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: white;
-  border: 1px solid #ccc;
-  width: 400px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  padding: 10px;
-  border-radius: 5px;
-  margin-top: 10px;
-  height: 430px;
-  overflow-y: auto; /* 当内容超过高度时启用滚动 */
-}
-
-
-/* 类别的头部 */
-.hot-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
-.scroll-button {
-  cursor: pointer;
-  font-size: 20px;
-  user-select: none;
-  padding: 5px;
-  margin-top: 4px; /* 增加 margin-top */
-}
-
-/* 类别水平滑动 */
-.hot-categories-wrapper {
-  overflow-x: auto;
-  display: flex;
-  scroll-behavior: smooth; /* 平滑滚动 */
-  scrollbar-width: none; /* 隐藏滚动条（Firefox） */
-  -ms-overflow-style: none; /* 隐藏滚动条（IE/Edge） */
-}
-
-.hot-categories-wrapper::-webkit-scrollbar {
-  display: none; /* 隐藏滚动条（Chrome, Safari） */
-}
-
-.hot-categories {
-  display: flex;
-  white-space: nowrap;
-  padding: 0 10px;
-  scroll-snap-type: x mandatory; /* 启用滑动时的停靠效果 */
-}
-
-.hot-categories span {
-  padding: 10px 15px;
-  cursor: pointer;
-  color: #333;
-  font-size: 14px;
-  scroll-snap-align: start; /* 停靠时对齐到元素的起点 */
-}
-
-.hot-categories span.active {
-  font-weight: bold;
-  color: #1890ff;
-  border-bottom: 2px solid #1890ff;
-}
-
-/* 热榜列表 */
-.hot-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  max-height: 500px; /* 根据需要设置合适的高度 */
-  overflow-y: auto; /* 内容超过高度时滚动显示 */
-}
-
-/* 每一行的条目 */
-.hot-item {
-  display: flex;
-  justify-content: flex-start; /* 保持左对齐 */
-  align-items: center;
-  padding: 8px 10px;
-  border-bottom: 1px solid #ebeef5;
-  transition: background-color 0.3s ease;
-}
-
-.hot-item:hover {
-  background-color: #f0f0f0; /* 悬停时改变背景色 */
-}
-
-/* 保持布局 */
-.item-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* 保持标题和热度值两端分布 */
-  padding-left: 5px;
-  padding-right: 5px; /* 减少右侧内边距 */
-  width: 100%; /* 确保内容占据全部宽度 */
-}
-
-/* 序号：固定宽度，左对齐 */
-.rank-number {
-  display: inline-block;
-  width: 20px; /* 固定宽度 */
-  height: 20px; /* 固定高度 */
-  line-height: 20px; /* 垂直居中 */
-  text-align: center;
-  font-weight: bold;
-  font-size: 12px;
-  color: white;
-  border-radius: 5px;
-  margin-right: 10px;
-  flex-shrink: 0; /* 防止 rank-number 被缩小 */
-}
-
-/* 标题：设置固定宽度，防止挤压 hot-value */
-.hot-title {
-  flex-grow: 1;
-  font-size: 14px;
-  text-decoration: none;
-  color: #333;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  text-align: left;
-  margin-right: 10px; /* 增加标题和热度值之间的空隙 */
-  width: 220px; /* 固定宽度，确保无论是否有省略号都保持一致 */
-  transition: color 0.3s ease;
 }
-
-.hot-title:hover {
-  color: red;
-}
-
-/* 热度值：固定宽度，靠右对齐 */
-.hot-value {
+.app-card__content h3 {
   font-size: 14px;
-  color: #888;
-  text-align: right;
-  white-space: nowrap;
-  width: 70px; /* 固定宽度，确保布局稳定 */
-  flex-shrink: 0; /* 防止被压缩 */
+  line-height: 1.3;
 }
-
-.hot-rankings-container {
-  position: relative;
+.subsection__header strong {
+  font-size: 15px;
 }
-
-.rankings-dropdown {
-  position: absolute;
-  top: 100%; /* 确保下拉框位于触发元素的正下方 */
-  left: 0;
-  background-color: white;
-  border: 1px solid #ccc;
-  width: 400px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  padding: 10px;
-  border-radius: 5px;
-  margin-top: 10px;
-  overflow-y: hidden; /* 隐藏多余的滚动条 */
-  height: auto; /* 允许弹性高度 */
+.subsection {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #eef4f7;
 }
-
-.rankings-dropdown::before {
-  content: '';
-  position: absolute;
-  top: -10px; /* 确保箭头在下拉框上方 */
-  left: 20px; /* 调整箭头相对于下拉框的位置，根据需要修改数值 */
-  border-width: 0 10px 10px 10px; /* 创建一个倒三角形 */
-  border-style: solid;
-  border-color: transparent transparent white transparent; /* 设置箭头颜色与下拉框背景一致 */
-  z-index: 1001;
+.backtop {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 15;
 }
-
-.rank-number {
-  display: inline-block;
-  width: 20px; /* 固定宽度 */
-  height: 20px; /* 固定高度 */
-  line-height: 20px; /* 让数字垂直居中 */
-  text-align: center;
-  font-weight: bold;
-  font-size: 12px; /* 字体大小调整 */
-  color: white; /* 文字颜色 */
-  border-radius: 5px; /* 圆角 */
-  margin-right: 10px; /* 添加间距 */
+.home-footer {
+  width: min(1480px,100%);
+  margin: 18px auto 0;
+  padding: 18px 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
 }
-
-
-.rank-first {
-  background-color: #ff4d4f; /* 第一名背景颜色 */
+.home-footer p { margin: 0; }
+@media (max-width: 1240px) {
+  .content-layout { grid-template-columns: 1fr; }
+  .catalog { position: static; }
 }
-
-.rank-second {
-  background-color: #ffa940; /* 第二名背景颜色 */
+@media (max-width: 900px) {
+  .home-shell { padding: 14px; }
+  .home-topbar { flex-direction: column; align-items: stretch; }
+  .topbar-actions { justify-content: flex-start; }
+  .user-trigger,
+  .user-menu { min-width: 100%; }
+  .metric-grid, .app-grid { grid-template-columns: 1fr; }
+  .section-card__header, .subsection__header, .home-footer { flex-direction: column; align-items: flex-start; }
+  .section-card__badge { width: 100%; text-align: left; }
 }
-
-.rank-third {
-  background-color: #ffec3d; /* 第三名背景颜色 */
-}
-
-.rank-default {
-  background-color: #001529; /* 其他名次的背景颜色（黑色） */
-}
-
-.footer-container {
-  background-color: #ffffff;
-  color: #333333;
-  text-align: left;
-  position: relative; /* 改为相对定位 */
-  width: calc(100% - 200px); /* 计算宽度以适应页面 */
-  margin-left: 200px; /* 与左侧边栏对齐 */
-  border-top: 1px solid #ebeef5;
-  box-sizing: border-box; /* 包括内边距在内 */
-  margin-top: 0;
-}
-
-.el-footer {
-  --el-footer-height: 30px !important;
+@media (max-width: 640px) {
+  .toolbar-card, .catalog__inner, .section-card { padding: 18px; border-radius: 24px; }
 }
 </style>

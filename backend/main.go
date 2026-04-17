@@ -3,13 +3,13 @@ package main
 import (
 	"errors"
 	"log"
+	"nav/backend/config"
+	"nav/backend/database"
+	"nav/backend/models"
+	"nav/backend/routes"
+	"nav/backend/utils"
 	"net/http"
 	"time"
-	"znav/backend/config"
-	"znav/backend/database"
-	"znav/backend/models"
-	"znav/backend/routes"
-	"znav/backend/utils"
 
 	"gorm.io/gorm"
 )

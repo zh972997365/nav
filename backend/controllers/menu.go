@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
+	"nav/backend/database"
+	"nav/backend/models"
 	"net/http"
 	"strconv"
-	"znav/backend/database"
-	"znav/backend/models"
 )
 
 func CreateMenu(c *gin.Context) {

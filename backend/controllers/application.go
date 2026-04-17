@@ -3,10 +3,10 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"log"
+	"nav/backend/database"
+	"nav/backend/models"
 	"net/http"
 	"strconv"
-	"znav/backend/database"
-	"znav/backend/models"
 )
 
 func CreateApplication(c *gin.Context) {

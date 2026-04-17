@@ -5,8 +5,8 @@ package routes
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"znav/backend/controllers"
-	"znav/backend/middlewares"
+	"nav/backend/controllers"
+	"nav/backend/middlewares"
 )
 
 func SetupRouter() *gin.Engine {
