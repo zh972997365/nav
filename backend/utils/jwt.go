@@ -1,23 +1,22 @@
-// utils/jwt.go
-
 package utils
 
 import (
+	"os"
+	"time"
+
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
-	"time"
 )
 
-var jwtKey = []byte("gdwerxzsderg")
+var jwtKey = []byte(getJWTSecret())
 
 type Claims struct {
 	Username string `json:"username"`
 	jwt.StandardClaims
 }
 
-// 生成 JWT，并设置 24 小时过期
 func GenerateJWT(username string) (string, error) {
-	expirationTime := time.Now().Add(24 * time.Hour) // 设置为24小时过期
+	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
@@ -29,24 +28,12 @@ func GenerateJWT(username string) (string, error) {
 	return token.SignedString(jwtKey)
 }
 
-// 验证 JWT 是否有效
-func ValidateJWT(tokenString string) bool {
-	claims := &Claims{}
-
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
-	})
-
-	return err == nil && token.Valid
-}
-
 func GetUsernameFromJWT(tokenString string) (string, error) {
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
-
 	if err != nil || !token.Valid {
 		return "", err
 	}
@@ -55,16 +42,22 @@ func GetUsernameFromJWT(tokenString string) (string, error) {
 }
 
 func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14) // 密码哈希，cost值为14
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
 
 func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }
 
-// CheckPassword 验证密码是否正确
 func CheckPassword(password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
+func getJWTSecret() string {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return "gdwerxzsderg"
+	}
+	return secret
 }

@@ -9,7 +9,7 @@ ENV GOPROXY=https://goproxy.cn,direct \
 WORKDIR /src
 
 # 下载依赖文件
-COPY go.mod go.sum* ./
+COPY go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod go mod download
 
 # 复制源码

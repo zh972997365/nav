@@ -3,13 +3,14 @@ package main
 import (
 	"errors"
 	"log"
+	"net/http"
+	"time"
+
 	"nav/backend/config"
 	"nav/backend/database"
 	"nav/backend/models"
 	"nav/backend/routes"
 	"nav/backend/utils"
-	"net/http"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -29,9 +30,17 @@ func main() {
 	db := database.GetDB()
 
 	models.Migrate(db)
+	ensureDefaultAdmin(db)
 
-	now := time.Now()
+	router := routes.SetupRouter()
 
+	log.Println("Starting server on :8080")
+	if err := http.ListenAndServe(":8080", router); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
+}
+
+func ensureDefaultAdmin(db *gorm.DB) {
 	var user models.User
 	if err := db.Where("username = ?", "admin").First(&user).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -43,6 +52,7 @@ func main() {
 			log.Fatalf("Failed to hash default admin password: %v", err)
 		}
 
+		now := time.Now()
 		user = models.User{
 			Username: "admin",
 			Password: hashedPassword,
@@ -55,22 +65,17 @@ func main() {
 			log.Fatalf("Failed to create default admin user: %v", err)
 		}
 		log.Println("Initialized default admin user with username: admin and password: admin")
-	} else {
-		if !user.IsAdmin {
-			user.IsAdmin = true
-			if err := db.Save(&user).Error; err != nil {
-				log.Fatalf("Failed to update admin user to administrator: %v", err)
-			}
-			log.Println("Updated existing admin user to have administrator privileges")
-		} else {
-			log.Println("Admin user already exists and is an administrator")
-		}
+		return
 	}
 
-	router := routes.SetupRouter()
-
-	log.Println("Starting server on :8080")
-	if err := http.ListenAndServe(":8080", router); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+	if user.IsAdmin {
+		log.Println("Admin user already exists and is an administrator")
+		return
 	}
+
+	user.IsAdmin = true
+	if err := db.Save(&user).Error; err != nil {
+		log.Fatalf("Failed to update admin user to administrator: %v", err)
+	}
+	log.Println("Updated existing admin user to have administrator privileges")
 }

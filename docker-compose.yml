@@ -10,12 +10,12 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./backend/data:/app/backend/data
+      - ./data:/app/backend/data
 
   nav-frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: nav-frontend
     restart: unless-stopped
     depends_on:
