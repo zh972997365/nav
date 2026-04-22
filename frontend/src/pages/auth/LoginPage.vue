@@ -1,98 +1,135 @@
 <template>
   <div class="login-screen">
-    <section class="login-showcase">
-      <div class="login-showcase__backdrop"></div>
-      <div class="login-showcase__content">
-        <p class="login-showcase__eyebrow">Console Access</p>
-        <h1>{{ siteTitle || 'ZNav' }}</h1>
-        <p class="login-showcase__description">
-          一个更轻盈、更稳定的后台入口。把复杂操作收进清晰结构里，让你登录后能立刻进入工作状态。
-        </p>
+    <div class="login-layout">
+      <section class="login-stage">
+        <div class="login-stage__frame">
+          <div class="login-stage__glow login-stage__glow--top"></div>
+          <div class="login-stage__glow login-stage__glow--bottom"></div>
 
-        <div class="login-showcase__highlights">
-          <article class="login-showcase__highlight">
-            <span class="login-showcase__highlight-index">01</span>
-            <div>
-              <strong>统一的管理体验</strong>
-              <p>应用、菜单、用户与配置维护保持同一套后台语言，减少切换成本。</p>
+          <header class="login-stage__header">
+            <div class="login-stage__brand">
+              <div class="login-stage__logo">
+                <img v-if="isUrl(displayIcon)" :src="displayIcon" alt="logo" class="login-stage__logo-image" />
+                <icon v-else :icon="displayIcon" :color="displayIconColor" width="28" height="28" />
+              </div>
+              <div class="login-stage__brand-copy">
+                <p class="login-stage__eyebrow">Console Access</p>
+                <strong>{{ siteTitle || 'ZNav' }}</strong>
+              </div>
             </div>
-          </article>
 
-          <article class="login-showcase__highlight">
-            <span class="login-showcase__highlight-index">02</span>
-            <div>
-              <strong>更清晰的工作动线</strong>
-              <p>筛选、编辑、批量操作和预览都回到更自然的阅读节奏里。</p>
+            <div class="login-stage__status">
+              <span class="login-stage__status-dot"></span>
+              <span>Secure Entry</span>
             </div>
-          </article>
+          </header>
 
-          <article class="login-showcase__highlight">
-            <span class="login-showcase__highlight-index">03</span>
-            <div>
-              <strong>稳定且可持续扩展</strong>
-              <p>界面先保证日常使用舒服，再为后续继续打磨页面留足空间。</p>
-            </div>
-          </article>
-        </div>
+          <div class="login-stage__body">
+            <section class="login-copy">
+              <div class="login-copy__hero">
+                <p class="login-copy__eyebrow">管理入口</p>
+                <div class="login-copy__divider"></div>
+              </div>
 
-        <div class="login-showcase__footer">
-          <div class="login-showcase__footer-item">
-            <span>聚焦内容</span>
+              <div class="login-copy__overview">
+                <div class="login-copy__overview-main">
+                  <span class="login-copy__overview-label">后台工作台</span>
+                  <strong>统一入口</strong>
+                  <p>维护站点信息，让后台操作保持清晰、稳定和高效。</p>
+                </div>
+                <div class="login-copy__overview-side">
+                  <span>安全访问</span>
+                  <span>统一入口</span>
+                </div>
+              </div>
+
+              <div class="login-copy__feature-list">
+                <article class="login-copy__feature">
+                  <span class="login-copy__feature-index">01</span>
+                  <div>
+                    <strong>应用管理</strong>
+                    <p>维护应用信息、入口链接与展示内容。</p>
+                  </div>
+                </article>
+                <article class="login-copy__feature">
+                  <span class="login-copy__feature-index">02</span>
+                  <div>
+                    <strong>菜单管理</strong>
+                    <p>调整导航层级、分组与页面跳转关系。</p>
+                  </div>
+                </article>
+                <article class="login-copy__feature">
+                  <span class="login-copy__feature-index">03</span>
+                  <div>
+                    <strong>账号与设置</strong>
+                    <p>管理后台账号，并维护系统基础配置。</p>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="login-panel">
+              <div class="login-panel__surface">
+                <div class="login-panel__head">
+                  <div class="login-panel__title">
+                    <div class="login-panel__title-logo">
+                      <img v-if="isUrl(displayIcon)" :src="displayIcon" alt="logo" class="login-panel__title-logo-image" />
+                      <icon v-else :icon="displayIcon" :color="displayIconColor" width="28" height="28" />
+                    </div>
+                    <div class="login-panel__title-copy">
+                      <p class="login-panel__eyebrow">Welcome Back</p>
+                      <h2>登录管理后台</h2>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="login-panel__meta">
+                  <div class="login-panel__meta-item">
+                    <span class="login-panel__meta-label">状态</span>
+                    <strong>安全登录</strong>
+                  </div>
+                  <div class="login-panel__meta-item">
+                    <span class="login-panel__meta-label">默认账号</span>
+                    <strong><code>admin</code></strong>
+                  </div>
+                </div>
+
+                <el-form ref="loginForm" :model="loginForm" class="login-form" @submit.prevent="login">
+                  <el-form-item prop="username">
+                    <div class="login-field">
+                      <label>用户名</label>
+                      <el-input v-model="loginForm.username" placeholder="请输入用户名" />
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item prop="password">
+                    <div class="login-field">
+                      <label>密码</label>
+                      <el-input
+                        v-model="loginForm.password"
+                        type="password"
+                        show-password
+                        placeholder="请输入密码"
+                      />
+                    </div>
+                  </el-form-item>
+
+                  <el-button type="primary" native-type="submit" class="login-submit">
+                    <icon icon="solar:login-2-outline" width="16" height="16" />
+                    <span>进入后台</span>
+                  </el-button>
+                </el-form>
+
+                <footer class="login-panel__footer">
+                  <span>登录后进入后台控制台</span>
+                  <span>请使用具备管理权限的账号操作</span>
+                </footer>
+              </div>
+            </section>
           </div>
-          <div class="login-showcase__footer-item">
-            <span>统一布局</span>
-          </div>
-          <div class="login-showcase__footer-item">
-            <span>体验更自然</span>
-          </div>
         </div>
-      </div>
-    </section>
-
-    <section class="login-panel">
-      <div class="login-panel__card">
-        <div class="login-panel__brand">
-          <div class="login-panel__logo">
-            <img v-if="isUrl(displayIcon)" :src="displayIcon" alt="logo" class="login-panel__logo-image" />
-            <icon v-else :icon="displayIcon" :color="displayIconColor" width="26" height="26" />
-          </div>
-          <div>
-            <p class="login-panel__eyebrow">Welcome Back</p>
-            <h2>登录管理后台</h2>
-          </div>
-        </div>
-
-        <div class="login-panel__intro">
-          <p class="login-panel__description">请输入账号和密码，进入控制台继续管理站点内容与导航结构。</p>
-          <div class="login-panel__badge">安全登录</div>
-        </div>
-
-        <el-form ref="loginForm" :model="loginForm" class="login-form" @submit.prevent="login">
-          <el-form-item prop="username">
-            <div class="login-field">
-              <label>用户名</label>
-              <el-input v-model="loginForm.username" placeholder="请输入用户名" />
-            </div>
-          </el-form-item>
-
-          <el-form-item prop="password">
-            <div class="login-field">
-              <label>密码</label>
-              <el-input v-model="loginForm.password" type="password" show-password placeholder="请输入密码" />
-            </div>
-          </el-form-item>
-
-          <el-button type="primary" native-type="submit" class="login-submit">
-            <icon icon="solar:login-2-outline" width="16" height="16" />
-            <span>进入后台</span>
-          </el-button>
-        </el-form>
-
-        <div class="login-panel__footer">
-          默认管理员账号通常为 <code>admin</code>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -160,208 +197,422 @@ export default {
 <style scoped>
 .login-screen {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: minmax(0, 1.18fr) minmax(400px, 460px);
-  background:
-    radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 24%),
-    radial-gradient(circle at bottom right, rgba(94, 234, 212, 0.1), transparent 22%),
-    linear-gradient(180deg, #f4f9fb, #fbfefe 52%, #f2f8f9);
-}
-
-.login-showcase,
-.login-panel {
-  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 36px;
-}
-
-.login-showcase__backdrop {
-  position: absolute;
-  inset: 36px 0 36px 36px;
-  border-radius: 36px;
   background:
-    radial-gradient(circle at top right, rgba(191, 219, 254, 0.16), transparent 28%),
-    linear-gradient(135deg, rgba(89, 171, 176, 0.96), rgba(30, 41, 59, 0.96)),
-    #0f172a;
-  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.16);
+    radial-gradient(circle at top left, rgba(125, 211, 252, 0.14), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(94, 234, 212, 0.12), transparent 26%),
+    linear-gradient(180deg, #f4f9fb, #fbfefe 52%, #f2f8f9);
 }
 
-.login-showcase__content {
+.login-layout {
+  width: min(1280px, 100%);
+  margin: 0 auto;
+}
+
+.login-stage {
+  width: 100%;
+}
+
+.login-stage__frame {
+  position: relative;
+  min-height: min(840px, calc(100vh - 48px));
+  overflow: hidden;
+  border-radius: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  background:
+    linear-gradient(145deg, rgba(16, 32, 51, 0.96), rgba(46, 87, 108, 0.95) 46%, rgba(244, 249, 251, 0.92) 46.1%, rgba(255, 255, 255, 0.9) 100%);
+  box-shadow: 0 32px 90px rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(18px);
+}
+
+.login-stage__glow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.login-stage__glow--top {
+  top: -120px;
+  left: -80px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(110, 231, 231, 0.24), transparent 70%);
+}
+
+.login-stage__glow--bottom {
+  right: -120px;
+  bottom: -140px;
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(63, 143, 148, 0.12), transparent 72%);
+}
+
+.login-stage__header {
   position: relative;
   z-index: 1;
-  width: 100%;
-  max-width: 620px;
-  color: #f4feff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 28px 0;
 }
 
-.login-showcase__eyebrow,
+.login-stage__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.login-stage__logo {
+  width: 58px;
+  height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.login-stage__logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.login-stage__brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #ffffff;
+}
+
+.login-stage__eyebrow,
+.login-copy__eyebrow,
 .login-panel__eyebrow {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
-.login-showcase__eyebrow {
-  color: rgba(216, 249, 248, 0.88);
+.login-stage__eyebrow {
+  color: rgba(216, 249, 248, 0.78);
 }
 
-.login-showcase h1 {
-  margin: 0;
-  max-width: 420px;
-  font-size: 56px;
-  line-height: 0.95;
+.login-stage__brand-copy strong {
+  font-size: 20px;
+  line-height: 1;
 }
 
-.login-showcase__description {
-  max-width: 560px;
-  margin: 20px 0 0;
-  font-size: 15px;
-  line-height: 1.9;
-  color: rgba(226, 232, 240, 0.82);
-}
-
-.login-showcase__highlights {
-  display: grid;
-  gap: 14px;
-  margin-top: 32px;
-}
-
-.login-showcase__highlight {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 14px;
-  align-items: start;
-  padding: 18px 20px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
-}
-
-.login-showcase__highlight-index {
-  width: 52px;
-  height: 52px;
+.login-stage__status {
+  min-height: 38px;
+  padding: 0 14px;
   display: inline-flex;
   align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #7ce7dd;
+  font-size: 12px;
+}
+
+.login-stage__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #7ce7dd;
+  box-shadow: 0 0 0 4px rgba(124, 231, 221, 0.18);
+}
+
+.login-stage__body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.06fr) minmax(380px, 440px);
+  align-items: center;
+  gap: 28px;
+  padding: 24px 28px 28px;
+  min-height: 0;
+}
+
+.login-copy {
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  border-radius: 16px;
+  padding: 22px 16px 12px 8px;
+  color: #f4feff;
+  align-self: center;
+}
+
+.login-copy__eyebrow {
+  color: rgba(216, 249, 248, 0.72);
+}
+
+.login-copy__hero h1 {
+  margin: 14px 0 0;
+  max-width: 520px;
+  font-size: clamp(36px, 3.5vw, 52px);
+  line-height: 1.04;
+}
+
+.login-copy__divider {
+  width: 88px;
+  height: 4px;
+  margin-top: 22px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(124, 231, 221, 0.9), rgba(124, 231, 221, 0.12));
+}
+
+.login-copy__overview {
+  max-width: 560px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  margin-top: 30px;
+  padding: 20px 22px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(124, 231, 221, 0.16), transparent 30%),
+    linear-gradient(180deg, rgba(104, 191, 187, 0.22), rgba(18, 35, 53, 0.3));
+  border: 1px solid rgba(210, 242, 244, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.login-copy__overview:hover {
+  transform: translateY(-3px);
+  border-color: rgba(210, 242, 244, 0.2);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  background:
+    radial-gradient(circle at top right, rgba(124, 231, 221, 0.2), transparent 30%),
+    linear-gradient(180deg, rgba(104, 191, 187, 0.26), rgba(18, 35, 53, 0.34));
+}
+
+.login-copy__overview-label {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 0 12px;
+  margin-bottom: 14px;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.1);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: #dffafa;
 }
 
-.login-showcase__highlight strong {
+.login-copy__overview-main strong {
   display: block;
-  font-size: 15px;
+  max-width: 420px;
+  font-size: 24px;
+  line-height: 1.3;
+  color: #ffffff;
 }
 
-.login-showcase__highlight p {
-  margin: 8px 0 0;
+.login-copy__overview-main p {
+  max-width: 430px;
+  margin: 10px 0 0;
   font-size: 13px;
   line-height: 1.75;
   color: rgba(226, 232, 240, 0.8);
 }
 
-.login-showcase__footer {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.login-showcase__footer-item {
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.login-showcase__footer-item span {
-  display: block;
-  font-size: 11px;
-  color: rgba(216, 249, 248, 0.72);
-}
-
-.login-showcase__footer-item strong {
-  display: block;
-  margin-top: 8px;
-  font-size: 15px;
-  color: #ffffff;
-}
-
-.login-panel__card {
-  width: 100%;
-  padding: 32px;
-  border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
-  backdrop-filter: blur(18px);
-}
-
-.login-panel__brand {
+.login-copy__overview-side {
   display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.login-copy__overview-side span {
+  min-height: 34px;
+  padding: 0 14px;
+  display: inline-flex;
   align-items: center;
-  gap: 14px;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(232, 250, 250, 0.9);
+  font-size: 12px;
 }
 
-.login-panel__logo {
-  width: 58px;
-  height: 58px;
-  display: flex;
+.login-copy__feature-list {
+  max-width: 560px;
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.login-copy__feature {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: rgba(18, 35, 53, 0.22);
+  border: 1px solid rgba(210, 242, 244, 0.08);
+  backdrop-filter: blur(10px);
+  transition: transform 0.22s ease, background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.login-copy__feature:hover {
+  transform: translateY(-2px);
+  background: rgba(23, 43, 64, 0.34);
+  border-color: rgba(210, 242, 244, 0.14);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+}
+
+.login-copy__feature-index {
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 18px;
-  background: linear-gradient(135deg, rgba(99, 179, 181, 0.1), rgba(125, 211, 252, 0.08));
+  background: rgba(255, 255, 255, 0.1);
+  color: #dffafa;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.login-copy__feature strong {
+  display: block;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.login-copy__feature p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(226, 232, 240, 0.8);
+}
+
+.login-panel {
+  display: flex;
+  align-items: center;
+  align-self: center;
+}
+
+.login-panel__surface {
+  width: 100%;
+  padding: 34px 30px 26px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 251, 252, 0.9));
+  box-shadow: 0 26px 64px rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(20px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.login-panel__surface:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 30px 72px rgba(15, 23, 42, 0.12);
+}
+
+.login-panel__head {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.login-panel__title-logo {
+  width: 58px;
+  height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(234, 246, 247, 0.98), rgba(242, 250, 250, 0.92));
+  box-shadow: inset 0 0 0 1px rgba(63, 143, 148, 0.08);
   overflow: hidden;
 }
 
-.login-panel__logo-image {
+.login-panel__title-logo-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.login-panel__title-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .login-panel__eyebrow {
   color: #3f8f94;
 }
 
-.login-panel__brand h2 {
+.login-panel__title-copy h2 {
   margin: 0;
-  font-size: 30px;
+  font-size: 34px;
+  line-height: 1.08;
   color: #111827;
 }
 
-.login-panel__intro {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-top: 20px;
+.login-panel__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
 }
 
-.login-panel__description {
-  margin: 0;
+.login-panel__meta-item {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(234, 246, 247, 0.96), rgba(244, 250, 251, 0.96));
+  border: 1px solid #dcebed;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+.login-panel__meta-item:hover {
+  transform: translateY(-2px);
+  border-color: #c6dde1;
+  background: linear-gradient(180deg, rgba(236, 248, 249, 0.98), rgba(248, 252, 252, 0.96));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.login-panel__meta-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a8b9c;
+}
+
+.login-panel__meta-item strong {
   font-size: 14px;
-  line-height: 1.8;
-  color: #64748b;
+  color: #102033;
 }
 
-.login-panel__badge {
-  flex-shrink: 0;
-  min-height: 34px;
-  padding: 0 14px;
-  display: inline-flex;
-  align-items: center;
+.login-panel__meta-item code {
+  padding: 2px 6px;
   border-radius: 999px;
-  background: #eaf6f7;
+  background: rgba(63, 143, 148, 0.12);
   color: #3f8f94;
-  font-size: 12px;
-  font-weight: 600;
 }
 
 .login-form {
@@ -382,58 +633,109 @@ export default {
 
 .login-submit {
   width: 100%;
-  min-height: 46px;
-  margin-top: 10px;
+  min-height: 48px;
+  margin-top: 12px;
   border: none !important;
-  border-radius: 16px;
+  border-radius: 18px;
   background: linear-gradient(135deg, #63b4b1, #478f95) !important;
   box-shadow: 0 16px 32px rgba(71, 143, 149, 0.2);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+}
+
+.login-submit:hover,
+.login-submit:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 36px rgba(71, 143, 149, 0.24);
+  filter: brightness(1.02);
 }
 
 .login-panel__footer {
-  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e7eef1;
   font-size: 12px;
-  color: #94a3b8;
+  color: #8b9aaa;
 }
 
-.login-panel__footer code {
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: #eaf6f7;
-  color: #3f8f94;
-}
-
-@media (max-width: 1080px) {
+@media (max-width: 1120px) {
   .login-screen {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .login-stage__frame {
+    min-height: auto;
+  }
+
+  .login-stage__body {
     grid-template-columns: 1fr;
   }
 
-  .login-showcase__backdrop {
-    inset: 20px;
-  }
-
-  .login-showcase,
-  .login-panel {
-    padding: 20px;
+  .login-copy {
+    padding: 8px 8px 0;
   }
 }
 
 @media (max-width: 768px) {
-  .login-showcase h1 {
-    font-size: 42px;
+  .login-screen {
+    padding: 14px;
   }
 
-  .login-showcase__footer {
-    grid-template-columns: 1fr;
+  .login-stage__frame {
+    border-radius: 28px;
+    background:
+      linear-gradient(180deg, rgba(16, 32, 51, 0.96), rgba(46, 87, 108, 0.94) 34%, rgba(244, 249, 251, 0.92) 34.1%, rgba(255, 255, 255, 0.9) 100%);
   }
 
-  .login-showcase__highlight {
-    grid-template-columns: 1fr;
+  .login-stage__header,
+  .login-stage__body {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
-  .login-panel__intro {
+  .login-stage__header {
     flex-direction: column;
     align-items: flex-start;
+    padding-top: 16px;
+  }
+
+  .login-stage__body {
+    gap: 18px;
+    padding-top: 18px;
+    padding-bottom: 16px;
+  }
+
+  .login-copy {
+    padding: 12px 0 0;
+  }
+
+  .login-copy__hero h1 {
+    font-size: 34px;
+  }
+
+  .login-copy__overview {
+    grid-template-columns: 1fr;
+  }
+
+  .login-panel__surface {
+    padding: 24px 20px 20px;
+    border-radius: 24px;
+  }
+
+  .login-panel__title {
+    align-items: flex-start;
+  }
+
+  .login-panel__title-copy h2 {
+    font-size: 28px;
+  }
+
+  .login-panel__meta {
+    grid-template-columns: 1fr;
   }
 }
 </style>
